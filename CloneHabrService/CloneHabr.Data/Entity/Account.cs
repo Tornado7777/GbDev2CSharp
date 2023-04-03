@@ -27,7 +27,7 @@ namespace CloneHabr.Data
         public string LastName { get; set; }
 
         [StringLength(255)]
-        public string SecondName { get; set; }
+        public string SecondName { get; set; }  //TODO считаю, что это поле не нужно (проверка работы с репозиторием)
 
         [InverseProperty(nameof(AccountSession.Account))]
         public virtual ICollection<AccountSession> Sessions { get; set; } = new HashSet<AccountSession>();
