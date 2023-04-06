@@ -105,6 +105,7 @@ namespace CloneHabrService
             #region Configure FluentValidator
 
             builder.Services.AddScoped<IValidator<AuthenticationRequest>, AuthenticationRequestValidator>();
+            builder.Services.AddScoped<IValidator<RegistrationRequest>, RegistrationRequestValidator>();
 
             #endregion
 

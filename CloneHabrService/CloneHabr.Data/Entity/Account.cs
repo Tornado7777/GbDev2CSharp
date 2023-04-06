@@ -12,14 +12,6 @@ namespace CloneHabr.Data
         [StringLength(255)]
         public string EMail { get; set; }
 
-        [StringLength(100)]
-        public string PasswordSalt { get; set; }
-
-        [StringLength(100)]
-        public string PasswordHash { get; set; }
-
-        public bool Locked { get; set; }
-
         [StringLength(255)]
         public string FirstName { get; set; }
 
@@ -29,8 +21,13 @@ namespace CloneHabr.Data
         [StringLength(255)]
         public string SecondName { get; set; }
 
-        [InverseProperty(nameof(AccountSession.Account))]
-        public virtual ICollection<AccountSession> Sessions { get; set; } = new HashSet<AccountSession>();
+        public DateTime Birthday { get; set; }
+
+        public DateTime RegistrationDate { get; set; }
+
+        public bool Online { get; set; }
+
+        public int Gender { get; set; }
 
     }
 }

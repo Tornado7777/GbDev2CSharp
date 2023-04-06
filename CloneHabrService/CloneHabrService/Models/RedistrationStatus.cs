@@ -5,6 +5,7 @@
         Success = 0,
         LoginBusy = 1,
         BadPassword = 2,
-        ErrorCreateSession
+        ErrorCreateUser = 3,
+        ErrorCreateSession = 4
     }
 }

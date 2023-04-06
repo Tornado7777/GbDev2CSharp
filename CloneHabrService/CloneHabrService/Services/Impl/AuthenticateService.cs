@@ -2,6 +2,7 @@
 using CloneHabrService.Models;
 using CloneHabrService.Models.Requests;
 using Microsoft.IdentityModel.Tokens;
+using NLog.Fluent;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -41,15 +42,15 @@ namespace CloneHabrService.Services.Impl
                 using IServiceScope scope = _serviceScopeFactory.CreateScope();
                 ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
 
-                AccountSession session = context
-                    .AccountSessions
+                UserSession session = context
+                    .UserSessions
                     .FirstOrDefault(item => item.SessionToken == sessionToken);
                 if (sessionDto == null)
                     return null;
 
-                Account account = context.Accounts.FirstOrDefault(item => item.AccountId == session.AccountId);
+                User user = context.Users.FirstOrDefault(item => item.UserId == session.UserId);
 
-                sessionDto = GetSessionDto(account, session);
+                sessionDto = GetSessionDto(user, session);
                 if(sessionDto != null)
                 {
                     lock (_sessions)
@@ -68,11 +69,11 @@ namespace CloneHabrService.Services.Impl
             using IServiceScope scope = _serviceScopeFactory.CreateScope();
             ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
 
-            Account account =
+            User user =
                !string.IsNullOrWhiteSpace(authenticationRequest.Login) ?
-               FindAccountByLogin(context, authenticationRequest.Login) : null;
+               FindUserByLogin(context, authenticationRequest.Login) : null;
 
-            if (account == null)
+            if (user == null)
             {
                 return new AuthenticationResponse
                 {
@@ -80,7 +81,7 @@ namespace CloneHabrService.Services.Impl
                 };
             }
 
-            if (!PasswordUtils.VerifyPassword(authenticationRequest.Password, account.PasswordSalt, account.PasswordHash))
+            if (!PasswordUtils.VerifyPassword(authenticationRequest.Password, user.PasswordSalt, user.PasswordHash))
             {
                 return new AuthenticationResponse
                 {
@@ -88,19 +89,19 @@ namespace CloneHabrService.Services.Impl
                 };
             }
 
-            AccountSession session = new AccountSession
+            UserSession session = new UserSession
             {
-                AccountId = account.AccountId,
-                SessionToken = CreateSessionToken(account),
+                UserId = user.UserId,
+                SessionToken = CreateSessionToken(user),
                 TimeCreated = DateTime.Now,
                 TimeLastRequest = DateTime.Now,
                 IsClosed = false,
             };
 
-            context.AccountSessions.Add(session);
+            context.UserSessions.Add(session);
             context.SaveChanges();
 
-            SessionDto sessionDto = GetSessionDto(account, session);
+            SessionDto sessionDto = GetSessionDto(user, session);
 
             lock (_sessions)
             {
@@ -119,30 +120,86 @@ namespace CloneHabrService.Services.Impl
             using IServiceScope scope = _serviceScopeFactory.CreateScope();
             ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
             //сделать запись в БД пользователя, при ошибке вернуть соответствующий статус
+            //проверить наличие такого же пользователя
+            if (context.Users.FirstOrDefault(user => user.Login == registrationRequest.Login) != null)
+            {
+                return new RegistrationResponse
+                {
+                    Status = RedistrationStatus.LoginBusy
+                }; 
+            }
 
+           var saltAndHash = PasswordUtils.CreatePasswordSaltAndHash(registrationRequest.Login).ToTuple();
+
+            var user = new User
+            {
+                Login = registrationRequest.Login,
+                PasswordSalt = saltAndHash.Item1,
+                PasswordHash = saltAndHash.Item2,
+                Locked = false
+            };
+            context.Users.Add(user);
+
+            if(context.SaveChanges() > 0)
+            {
+                UserSession session = new UserSession
+                {
+                    UserId = user.UserId,
+                    SessionToken = CreateSessionToken(user),
+                    TimeCreated = DateTime.Now,
+                    TimeLastRequest = DateTime.Now,
+                    IsClosed = false,
+                };
+
+                context.UserSessions.Add(session);
+                if(context.SaveChanges() < 1)
+                {
+                    return new RegistrationResponse
+                    {
+                        Status = RedistrationStatus.ErrorCreateSession
+                    };
+                }
+
+                SessionDto sessionDto = GetSessionDto(user, session);
+
+                lock (_sessions)
+                {
+                    _sessions[session.SessionToken] = sessionDto;
+                }
+                return new RegistrationResponse
+                {
+                    Status = RedistrationStatus.Success,
+                    Session = sessionDto
+                };
+            }
+            else
+            {
+                return new RegistrationResponse
+                {
+                    Status = RedistrationStatus.ErrorCreateUser
+                };
+            }
+
+            
             //при успешном создании в БД пользователя создать сессию пользователя
         }
 
-        private SessionDto GetSessionDto(Account account, AccountSession accountSession)
+        private SessionDto GetSessionDto(User user, UserSession userSession)
         {
             return new SessionDto
             {
-                SessionId = accountSession.SessionId,
-                SessionToken = accountSession.SessionToken,
-                Account = new AccountDto
+                SessionId = userSession.SessionId,
+                SessionToken = userSession.SessionToken,
+                User = new UserDto
                 {
-                    AccountId = account.AccountId,
-                    EMail = account.EMail,
-                    FirstName = account.FirstName,
-                    LastName = account.LastName,
-                    SecondName = account.SecondName,
-                    Locked = account.Locked
+                    UserId = user.UserId,
+                    Locked = user.Locked
                 }
             };
         }
 
 
-        private string CreateSessionToken(Account account)
+        private string CreateSessionToken(User user)
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             byte[] key = Encoding.ASCII.GetBytes(SecretKey);
@@ -150,21 +207,21 @@ namespace CloneHabrService.Services.Impl
             {
                 Subject = new ClaimsIdentity(
                     new Claim[]{
-                        new Claim(ClaimTypes.NameIdentifier, account.AccountId.ToString()),
-                        new Claim(ClaimTypes.Name, account.EMail),
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                        new Claim(ClaimTypes.Name, user.Login),
                     }),
-                Expires = DateTime.UtcNow.AddMinutes(15),
+                Expires = DateTime.UtcNow.AddMinutes(45),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
 
-        private Account FindAccountByLogin(ClonehabrDbContext context, string login)
+        private User FindUserByLogin(ClonehabrDbContext context, string login)
         {
             return context
-                .Accounts
-                .FirstOrDefault(account => account.EMail == login);
+                .Users
+                .FirstOrDefault(user => user.Login == login);
         }
 
 
