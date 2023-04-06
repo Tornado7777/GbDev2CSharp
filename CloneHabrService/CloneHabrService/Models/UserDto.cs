@@ -7,7 +7,7 @@
         public string Login { get; set; }
 
         public bool Locked { get; set; }
-        public DateTime EndDateLocked { get; set; }
+        public DateTime? EndDateLocked { get; set; }
 
     }
 }

@@ -130,13 +130,33 @@ namespace CloneHabrService.Services.Impl
             }
 
            var saltAndHash = PasswordUtils.CreatePasswordSaltAndHash(registrationRequest.Login).ToTuple();
+            var account = new Account { 
+                EMail = "",
+                FirstName = "",
+                LastName = "",
+                SecondName = "",
+                Birthday = DateTime.Now,
+                RegistrationDate = DateTime.Now,
+                Gender = 0,
+                Online = true,
+            };
+            context.Accounts.Add(account);
+            var result = context.SaveChanges();
+            if (result < 1)
+            {
+                return new RegistrationResponse
+                {
+                    Status = RedistrationStatus.ErrorCreateAccount
+                };
+            }
 
             var user = new User
             {
                 Login = registrationRequest.Login,
                 PasswordSalt = saltAndHash.Item1,
                 PasswordHash = saltAndHash.Item2,
-                Locked = false
+                Locked = false,
+                Account = account
             };
             context.Users.Add(user);
 
@@ -193,7 +213,9 @@ namespace CloneHabrService.Services.Impl
                 User = new UserDto
                 {
                     UserId = user.UserId,
-                    Locked = user.Locked
+                    Login = user.Login,
+                    Locked = user.Locked,
+                    EndDateLocked = user.EndDateLocked
                 }
             };
         }

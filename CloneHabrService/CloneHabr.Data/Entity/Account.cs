@@ -8,7 +8,7 @@ namespace CloneHabr.Data
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int AccountId { get; set; }
-
+        
         [StringLength(255)]
         public string EMail { get; set; }
 

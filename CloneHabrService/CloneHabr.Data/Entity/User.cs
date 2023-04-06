@@ -20,8 +20,12 @@ namespace CloneHabr.Data
 
         public bool Locked { get; set; }
 
-        public DateTime EndDateLocked { get; set; }
-        public Account Account { get; set; } = null!;
+        public DateTime? EndDateLocked { get; set; }
+
+        
+        [ForeignKey(nameof(Account))]
+        public int? AccountId { get; set; }
+        public Account Account { get; set; }
 
         //связь один ко многим
         [InverseProperty(nameof(UserSession.User))]
