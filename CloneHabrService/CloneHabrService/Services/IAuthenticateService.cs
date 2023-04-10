@@ -8,5 +8,6 @@ namespace CloneHabrService.Services
         AuthenticationResponse Login(AuthenticationRequest authenticationRequest);
 
         public SessionDto GetSession(string sessionToken);
+        public RegistrationResponse Registration(RegistrationRequest registrationRequest);
     }
 }

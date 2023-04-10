@@ -8,7 +8,7 @@ namespace CloneHabrService
     {
         private const string SecretKey = "Fz8wMguqN2DGWiD1ICvRxQ==";
 
-        public static (string passwordSalt, string passwordHash) CreatePasswordHash(string password)
+        public static (string passwordSalt, string passwordHash) CreatePasswordSaltAndHash(string password) //
         {
             // generate random salt 
             byte[] buffer = new byte[16];

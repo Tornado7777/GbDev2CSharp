@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace CloneHabr.Data
 {
     [Table("AccountSessions")]
-    public class AccountSession
+    public class UserSession
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SessionId { get; set; }
@@ -19,8 +19,8 @@ namespace CloneHabr.Data
         [StringLength(384)]
         public string SessionToken { get; set; }
 
-        [ForeignKey(nameof(Account))]
-        public int AccountId { get; set; }
+        [ForeignKey(nameof(User))]
+        public int UserId { get; set; }
 
         [Column(TypeName = "datetime2")]
         public DateTime TimeCreated { get; set; }
@@ -33,6 +33,6 @@ namespace CloneHabr.Data
         [Column(TypeName = "datetime2")]
         public DateTime? TimeClosed { get; set; }
 
-        public virtual Account Account { get; set; }
+        public virtual User User { get; set; }
     }
 }

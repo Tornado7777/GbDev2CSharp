@@ -9,8 +9,7 @@ namespace CloneHabrService.Models.Validators
         {
             RuleFor(x => x.Login)
                 .NotNull()
-                .Length(7, 255)
-                .EmailAddress();
+                .Length(6, 255);
 
             RuleFor(x => x.Password)
                 .NotNull()
