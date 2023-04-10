@@ -6,7 +6,7 @@
 
         public string SessionToken { get; set; }
 
-        public AccountDto Account { get; set; }
+        public UserDto User { get; set; }
 
     }
 }
