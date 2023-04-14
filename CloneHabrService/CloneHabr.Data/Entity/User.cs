@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CloneHabr.Data;
+using CloneHabr.Data.Entity;
 
 namespace CloneHabr.Data
 {
@@ -26,6 +28,7 @@ namespace CloneHabr.Data
         [ForeignKey(nameof(Account))]
         public int? AccountId { get; set; }
         public Account Account { get; set; }
+        public int RoleId { get; set; }
 
         //связь один ко многим
         [InverseProperty(nameof(UserSession.User))]
