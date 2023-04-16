@@ -125,7 +125,7 @@ namespace CloneHabrService.Services.Impl
             {
                 return new RegistrationResponse
                 {
-                    Status = RedistrationStatus.LoginBusy
+                    Status = RegistrationStatus.LoginBusy
                 }; 
             }
 
@@ -146,7 +146,7 @@ namespace CloneHabrService.Services.Impl
             {
                 return new RegistrationResponse
                 {
-                    Status = RedistrationStatus.ErrorCreateAccount
+                    Status = RegistrationStatus.ErrorCreateAccount
                 };
             }
 
@@ -159,8 +159,8 @@ namespace CloneHabrService.Services.Impl
                 Account = account
             };
             context.Users.Add(user);
-
-            if(context.SaveChanges() > 0)
+            //при успешном создании в БД пользователя создать сессию пользователя
+            if (context.SaveChanges() > 0)
             {
                 UserSession session = new UserSession
                 {
@@ -176,7 +176,7 @@ namespace CloneHabrService.Services.Impl
                 {
                     return new RegistrationResponse
                     {
-                        Status = RedistrationStatus.ErrorCreateSession
+                        Status = RegistrationStatus.ErrorCreateSession
                     };
                 }
 
@@ -188,7 +188,7 @@ namespace CloneHabrService.Services.Impl
                 }
                 return new RegistrationResponse
                 {
-                    Status = RedistrationStatus.Success,
+                    Status = RegistrationStatus.Success,
                     Session = sessionDto
                 };
             }
@@ -196,12 +196,9 @@ namespace CloneHabrService.Services.Impl
             {
                 return new RegistrationResponse
                 {
-                    Status = RedistrationStatus.ErrorCreateUser
+                    Status = RegistrationStatus.ErrorCreateUser
                 };
             }
-
-            
-            //при успешном создании в БД пользователя создать сессию пользователя
         }
 
         private SessionDto GetSessionDto(User user, UserSession userSession)
