@@ -3,7 +3,7 @@
     public class RegistrationResponse
     {
 
-        public RedistrationStatus Status { get; set; }
+        public RegistrationStatus Status { get; set; }
         public SessionDto Session { get; set; }
     }
 }

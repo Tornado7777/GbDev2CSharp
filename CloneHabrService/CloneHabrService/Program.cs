@@ -33,7 +33,7 @@ namespace CloneHabrService
 
             #endregion
 
-            #region Configure EF DBContext Service (EmployeeServiceDB Database)
+            #region Configure EF DBContext Service (Database)
 
             builder.Services.AddDbContext<ClonehabrDbContext>(options =>
             {
@@ -67,6 +67,7 @@ namespace CloneHabrService
             #region Configure Services
 
             builder.Services.AddSingleton<IAuthenticateService, AuthenticateService>();
+            builder.Services.AddSingleton<IArticleService, ArticleService>();
 
             #endregion
 
@@ -106,6 +107,9 @@ namespace CloneHabrService
 
             builder.Services.AddScoped<IValidator<AuthenticationRequest>, AuthenticationRequestValidator>();
             builder.Services.AddScoped<IValidator<RegistrationRequest>, RegistrationRequestValidator>();
+            builder.Services.AddScoped<IValidator<CreationArticleRequest>, CreationArticleRequestValidator>();
+            //builder.Services.AddScoped<IValidator<AccountDto>, AccountDtoValidator>();
+            builder.Services.AddScoped<IValidator<ArticleDto>, ArticleDtoValidator>();
 
             #endregion
 

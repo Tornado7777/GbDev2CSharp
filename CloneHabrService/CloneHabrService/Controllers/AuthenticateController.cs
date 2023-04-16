@@ -60,8 +60,8 @@ namespace CloneHabrService.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("Registration")]
-        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        [Route("registration")]
+        //[ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(RegistrationResponse), StatusCodes.Status200OK)]
         public IActionResult Registration([FromBody] RegistrationRequest registrationRequest)
         {
@@ -71,7 +71,7 @@ namespace CloneHabrService.Controllers
                 return BadRequest(validationResult.ToDictionary());
 
             RegistrationResponse registrationResponse = _authenticateService.Registration(registrationRequest);
-            if (registrationResponse.Status == Models.RedistrationStatus.Success)
+            if (registrationResponse.Status == Models.RegistrationStatus.Success)
             {
                 Response.Headers.Add("X-Session-Token", registrationResponse.Session.SessionToken);
             }
