@@ -1,6 +1,6 @@
 ﻿namespace CloneHabrService.Models
 {
-    public enum RedistrationStatus
+    public enum RegistrationStatus
     {
         Success = 0,
         LoginBusy = 1,
