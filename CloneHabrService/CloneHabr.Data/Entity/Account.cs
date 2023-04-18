@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CloneHabr.Data.Entity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CloneHabr.Data
@@ -28,6 +29,10 @@ namespace CloneHabr.Data
         public bool Online { get; set; }
 
         public int Gender { get; set; }
+
+        public virtual Comments Comment { get; set; }
+
+        public virtual Violations Violation { get; set; }
 
     }
 }
