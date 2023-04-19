@@ -28,11 +28,7 @@ namespace CloneHabr.Data
 
         public bool Online { get; set; }
 
-        public int Gender { get; set; }
-
-        public virtual Comments Comment { get; set; }
-
-        public virtual Violations Violation { get; set; }
+        public int Gender { get; set; }       
 
     }
 }

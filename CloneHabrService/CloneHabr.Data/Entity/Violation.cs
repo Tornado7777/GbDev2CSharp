@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -9,11 +10,11 @@ using System.Threading.Tasks;
 namespace CloneHabr.Data.Entity
 {
     [Table("Violations")]
-    public class Violations
+    public class Violation
     {
-        [ForeignKey(nameof(Account))]
-        public int ViolationsId { get; set; }
-        public string TypeOfViolations { get; set; }
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+        public string TypeOfViolation { get; set; }
 
         public string Punishment { get; set; }
 
@@ -23,8 +24,9 @@ namespace CloneHabr.Data.Entity
         [Column(TypeName = "datetime2")]
         public DateTime Duration { get; set; }
 
-        [InverseProperty(nameof(Account.Violation))]
-        public virtual ICollection<Account> Sessions { get; set; } = new HashSet<Account>();
+        [ForeignKey(nameof(User))]
+        public int? UserId { get; set; }
+        public User User { get; set; }
 
     }
 }

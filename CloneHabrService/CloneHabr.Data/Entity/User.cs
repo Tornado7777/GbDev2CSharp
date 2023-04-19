@@ -33,6 +33,11 @@ namespace CloneHabr.Data
         //связь один ко многим
         [InverseProperty(nameof(UserSession.User))]
         public virtual ICollection<UserSession> Sessions { get; set; } = new HashSet<UserSession>();
+        [InverseProperty(nameof(Comment.User))]
+        public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
+
+        [InverseProperty(nameof(Violation.User))]
+        public virtual ICollection<Violation> Violations { get; set; } = new HashSet<Violation>();
 
     }
 }
