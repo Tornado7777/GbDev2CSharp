@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CloneHabr.Data.Migrations
 {
     [DbContext(typeof(ClonehabrDbContext))]
-    [Migration("20230406172349_addAccointIdFKInUser2")]
-    partial class addAccointIdFKInUser2
+    [Migration("20230418184013_start")]
+    partial class start
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -70,6 +70,107 @@ namespace CloneHabr.Data.Migrations
                     b.ToTable("Accounts");
                 });
 
+            modelBuilder.Entity("CloneHabr.Data.Article", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(100000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Articles");
+                });
+
+            modelBuilder.Entity("CloneHabr.Data.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ArticleId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(100000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("CloneHabr.Data.Entity.Violation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Duration")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Punishment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("TimeOfViolation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TypeOfViolation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Violations");
+                });
+
             modelBuilder.Entity("CloneHabr.Data.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -102,6 +203,9 @@ namespace CloneHabr.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.HasKey("UserId");
 
@@ -145,6 +249,43 @@ namespace CloneHabr.Data.Migrations
                     b.ToTable("AccountSessions");
                 });
 
+            modelBuilder.Entity("CloneHabr.Data.Article", b =>
+                {
+                    b.HasOne("CloneHabr.Data.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CloneHabr.Data.Comment", b =>
+                {
+                    b.HasOne("CloneHabr.Data.Article", "Article")
+                        .WithMany("Comments")
+                        .HasForeignKey("ArticleId");
+
+                    b.HasOne("CloneHabr.Data.User", "User")
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CloneHabr.Data.Entity.Violation", b =>
+                {
+                    b.HasOne("CloneHabr.Data.User", "User")
+                        .WithMany("Violations")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CloneHabr.Data.User", b =>
                 {
                     b.HasOne("CloneHabr.Data.Account", "Account")
@@ -167,9 +308,18 @@ namespace CloneHabr.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CloneHabr.Data.Article", b =>
+                {
+                    b.Navigation("Comments");
+                });
+
             modelBuilder.Entity("CloneHabr.Data.User", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("Sessions");
+
+                    b.Navigation("Violations");
                 });
 #pragma warning restore 612, 618
         }

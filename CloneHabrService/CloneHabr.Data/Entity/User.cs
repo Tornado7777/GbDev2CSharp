@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CloneHabr.Data;
+using CloneHabr.Data.Entity;
 
 namespace CloneHabr.Data
 {
@@ -26,10 +28,16 @@ namespace CloneHabr.Data
         [ForeignKey(nameof(Account))]
         public int? AccountId { get; set; }
         public Account Account { get; set; }
+        public int RoleId { get; set; }
 
         //связь один ко многим
         [InverseProperty(nameof(UserSession.User))]
         public virtual ICollection<UserSession> Sessions { get; set; } = new HashSet<UserSession>();
+        [InverseProperty(nameof(Comment.User))]
+        public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
+
+        [InverseProperty(nameof(Violation.User))]
+        public virtual ICollection<Violation> Violations { get; set; } = new HashSet<Violation>();
 
     }
 }

@@ -227,7 +227,8 @@ namespace CloneHabrService.Services.Impl
                 Subject = new ClaimsIdentity(
                     new Claim[]{
                         new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                        new Claim(ClaimTypes.Name, user.Login),
+                        new Claim(ClaimTypes.Name, user.Login),  
+                        new Claim(ClaimTypes.NameIdentifier, user.RoleId.ToString())
                     }),
                 Expires = DateTime.UtcNow.AddMinutes(45),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
