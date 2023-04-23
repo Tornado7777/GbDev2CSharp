@@ -148,8 +148,15 @@ namespace CloneHabrService
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.UseWebAssemblyDebugging(); // for Blazor
             }
+            #region for Blazor
+            app.UseBlazorFrameworkFiles();
+            app.UseStaticFiles();
 
+            app.MapFallbackToFile("index.html");
+
+            #endregion
             app.UseRouting();
             app.UseAuthentication();
 
