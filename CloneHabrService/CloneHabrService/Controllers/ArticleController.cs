@@ -1,4 +1,4 @@
-﻿using CloneHabrService.Models;
+﻿using CloneHabr.Dto;
 using CloneHabr.Dto.Requests;
 using CloneHabrService.Models.Validators;
 using CloneHabrService.Services;
