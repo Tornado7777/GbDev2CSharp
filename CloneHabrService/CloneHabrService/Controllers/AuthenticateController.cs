@@ -1,5 +1,5 @@
-﻿using CloneHabrService.Models;
-using CloneHabrService.Models.Requests;
+﻿using CloneHabr.Dto;
+using CloneHabr.Dto.Requests;
 using CloneHabrService.Models.Validators;
 using CloneHabrService.Services;
 using FluentValidation;
@@ -51,7 +51,7 @@ namespace CloneHabrService.Controllers
                 return BadRequest(validationResult.ToDictionary());
 
             AuthenticationResponse authenticationResponse = _authenticateService.Login(authenticationRequest);
-            if (authenticationResponse.Status == Models.AuthenticationStatus.Success)
+            if (authenticationResponse.Status == CloneHabr.Dto.AuthenticationStatus.Success)
             {
                 Response.Headers.Add("X-Session-Token", authenticationResponse.Session.SessionToken);
             }
@@ -71,7 +71,7 @@ namespace CloneHabrService.Controllers
                 return BadRequest(validationResult.ToDictionary());
 
             RegistrationResponse registrationResponse = _authenticateService.Registration(registrationRequest);
-            if (registrationResponse.Status == Models.RegistrationStatus.Success)
+            if (registrationResponse.Status == CloneHabr.Dto.RegistrationStatus.Success)
             {
                 Response.Headers.Add("X-Session-Token", registrationResponse.Session.SessionToken);
             }

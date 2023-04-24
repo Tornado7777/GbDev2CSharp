@@ -1,5 +1,5 @@
-﻿using CloneHabrService.Models;
-using CloneHabrService.Models.Requests;
+﻿using CloneHabr.Dto;
+using CloneHabr.Dto.Requests;
 
 namespace CloneHabrService.Services
 {

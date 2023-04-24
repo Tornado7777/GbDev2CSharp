@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using CloneHabrService.Models;
+using CloneHabr.Dto;
 using CloneHabrService.Models.Options;
-using CloneHabrService.Models.Requests;
+using CloneHabr.Dto.Requests;
 using CloneHabrService.Models.Validators;
 using FluentValidation;
 using System.Text;
@@ -152,15 +152,8 @@ namespace CloneHabrService
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                app.UseWebAssemblyDebugging(); // for Blazor
             }
-            #region for Blazor
-            app.UseBlazorFrameworkFiles();
-            app.UseStaticFiles();
 
-            app.MapFallbackToFile("index.html");
-
-            #endregion
             app.UseRouting();
             app.UseAuthentication();
 
