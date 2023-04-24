@@ -11,9 +11,7 @@ namespace CloneHabr.Data
 
         [StringLength(255)]
         public string Name { get; set; }
-
-        [StringLength(100)]
-        public string Status { get; set; }
+        public int Status { get; set; }
 
         [StringLength(100000)]
         public string Text { get; set; }

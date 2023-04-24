@@ -37,7 +37,7 @@ namespace CloneHabrService.Services.Impl
             var article = new Article { 
                 Name = creationArticleRequest.Name,
                 Text = creationArticleRequest.Text,
-                Status = "publicate",
+                Status = (int) CloneHabr.Dto.ArticleStatus.Moderation,
                 CreationDate = DateTime.Now,
                 User = user
             };
