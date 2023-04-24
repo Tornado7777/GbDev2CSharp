@@ -1,5 +1,5 @@
-﻿using CloneHabrService.Models;
-using CloneHabrService.Models.Requests;
+﻿using CloneHabr.Dto;
+using CloneHabr.Dto.Requests;
 using CloneHabrService.Models.Validators;
 using CloneHabrService.Services;
 using CloneHabrService.Services.Impl;
@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
+using CloneHabr.Dto;
 
 namespace CloneHabrService.Controllers
 {

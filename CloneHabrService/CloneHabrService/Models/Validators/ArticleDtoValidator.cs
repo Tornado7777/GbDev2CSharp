@@ -1,4 +1,4 @@
-﻿using CloneHabrService.Models.Requests;
+﻿using CloneHabr.Dto;
 using FluentValidation;
 
 namespace CloneHabrService.Models.Validators

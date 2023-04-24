@@ -1,6 +1,6 @@
-﻿namespace CloneHabrService.Models.Requests
+﻿namespace CloneHabr.Dto.Requests
 {
-    public class AuthenticationRequest
+    public class RegistrationRequest
     {
         public string Login { get; set; }
         public string Password { get; set; }

@@ -1,6 +1,6 @@
 ﻿using CloneHabr.Data;
-using CloneHabrService.Models;
-using CloneHabrService.Models.Requests;
+using CloneHabr.Dto;
+using CloneHabr.Dto.Requests;
 using System.Data;
 using Microsoft.IdentityModel.Tokens;
 using NLog.Fluent;

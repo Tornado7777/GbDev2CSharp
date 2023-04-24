@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CloneHabr.BlazorUI\CloneHabr.BlazorUI.csproj" />
     <ProjectReference Include="..\CloneHabr.Data\CloneHabr.Data.csproj" />
+    <ProjectReference Include="..\CloneHabr.Dto\CloneHabr.Dto.csproj" />
   </ItemGroup>
 
 </Project>

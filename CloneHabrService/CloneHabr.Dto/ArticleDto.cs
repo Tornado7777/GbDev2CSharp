@@ -1,9 +1,7 @@
-﻿using CloneHabr.Data;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace CloneHabrService.Models
+namespace CloneHabr.Dto
 {
     public class ArticleDto
     {
