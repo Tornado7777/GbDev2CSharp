@@ -1,4 +1,5 @@
 ﻿@page "/"
+@page "/home"
 @inject UserInfo userInfo
 
 <PageTitle>Главная</PageTitle>
@@ -13,7 +14,7 @@
     protected override void OnInitialized()
     {
 
-        //Console.WriteLine($"Index OnInitialized: {userInfo.LoginName}\n{userInfo.SessionId}\n{userInfo.UserId}\n{userInfo.Token}");
+        Console.WriteLine($"Index OnInitialized******************: {userInfo.LoginName}\n{userInfo.SessionId}\n{userInfo.UserId}\n{userInfo.Token}");
 
     }
 

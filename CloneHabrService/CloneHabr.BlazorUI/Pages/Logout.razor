@@ -9,16 +9,6 @@
         Console.WriteLine($"userLoginName was: {userInfo.LoginName}");
         userInfo.LogOut();
         Console.WriteLine($"userLoginName now is: {userInfo.LoginName}");
-        Thread.Sleep(2000);
-        navigationManager.NavigateTo("/");
+        navigationManager.NavigateTo("/home");
     }
-
-    protected void OnAfterRender()
-    {
-        Console.WriteLine("Logout OnAfterRender******************");
-        userInfo.LogOut();
-        Console.WriteLine($"userLoginName is: {userInfo.LoginName}");
-        navigationManager.NavigateTo("/");
-    }
-
 }
