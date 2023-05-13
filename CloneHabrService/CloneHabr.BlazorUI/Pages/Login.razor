@@ -1,9 +1,28 @@
 ﻿@page "/login"
+@inject HttpClient httpClient
+@inject SessionDto userSession
+@inject UserInfo userInfo
+@inject NavigationManager navigationManager
+@using CloneHabr.Dto.Requests;
+
 
 <PageTitle>Login</PageTitle>
 
 <h1>Login</h1>
-This is the login page
+<div>
+    <EditForm Model="authenticationRequest" OnValidSubmit="SubmitForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <label>Login</label>
+        <InputText @bind-Value="authenticationRequest.Login" class="form-control"></InputText>
+        <label>Password</label>
+        <InputText @bind-Value="authenticationRequest.Password" type="password" class="form-control"></InputText>
+        <br />
+        <button class="btn btn-primary" type="submit">Login</button>
+    </EditForm>
+</div>
+<br />
+
 <p>
 If not register yet...
 
@@ -11,6 +30,31 @@ If not register yet...
     Register
 </NavLink>
 </p>
-@code {
 
+@code {
+    AuthenticationRequest authenticationRequest = new();
+
+    private async Task SubmitForm()
+    {
+        string uri = "api/Authenticate/login";
+
+        using var response = await httpClient.PostAsJsonAsync<AuthenticationRequest>(uri, authenticationRequest);
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            var authResponse = await response.Content.ReadFromJsonAsync<AuthenticationResponse>();
+
+            if (authResponse.Status == AuthenticationStatus.Success)
+            {
+                //userSession = authResponse.Session; значение не сохраняется при выходе из метода, WTF???
+
+                userInfo.LogIn(
+                    authResponse.Session.User.UserId,
+                    authResponse.Session.SessionId,
+                    authResponse.Session.User.Login,
+                    authResponse.Session.SessionToken);
+                navigationManager.NavigateTo("/");
+            }
+
+        }
+    }
 }
