@@ -1,9 +1,40 @@
 ﻿@page "/login"
+@inject HttpClient httpClient
+@inject SessionDto userSession
+@inject UserInfo userInfo
+@inject NavigationManager navigationManager
+@inject IJSRuntime JsRuntime
+@using CloneHabr.Dto.Requests;
+
 
 <PageTitle>Login</PageTitle>
 
-<h1>Login</h1>
-This is the login page
+<div class="row justify-content-center" >
+    <div class="col-md-10" >
+        <div class="card mt-3 mb-3" >
+            <div class="card-header">
+                <h2>Login</h2>
+            </div>
+            <div class="card-body">
+
+            <EditForm Model="authenticationRequest" OnValidSubmit="SubmitForm">
+                <Errors ErrorText=@loginErrorText></Errors>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                
+                <label>Login</label>
+                <InputText @bind-Value="authenticationRequest.Login" class="form-control"></InputText>
+                <label>Password</label>
+                <InputText @bind-Value="authenticationRequest.Password" type="password" class="form-control"></InputText>
+                <br />
+                <button class="btn btn-primary" type="submit">Login</button>
+            </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+
 <p>
 If not register yet...
 
@@ -11,6 +42,36 @@ If not register yet...
     Register
 </NavLink>
 </p>
-@code {
 
+@code {
+    AuthenticationRequest authenticationRequest = new();
+    string loginErrorText = string.Empty;
+
+    private async Task SubmitForm()
+    {
+        string uri = "api/Authenticate/login";
+
+        using var response = await httpClient.PostAsJsonAsync<AuthenticationRequest>(uri, authenticationRequest);
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            var authResponse = await response.Content.ReadFromJsonAsync<AuthenticationResponse>();
+
+            if (authResponse.Status == AuthenticationStatus.Success)
+            {
+                userInfo.LogIn(
+                    authResponse.Session.User.UserId,
+                    authResponse.Session.SessionId,
+                    authResponse.Session.User.Login,
+                    authResponse.Session.SessionToken);
+                navigationManager.NavigateTo("/home");
+            }
+            else
+            {
+                //_ = await JsRuntime.InvokeAsync<bool>("prompt", "Login unsuccess");
+                //await JsRuntime.InvokeVoidAsync("alert", "Login unsuccess");
+                loginErrorText = "Неверное имя или пароль";
+            }
+
+        }
+    }
 }

@@ -368,3 +368,5 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 *.tlog
 /CloneHabrService/CloneHabrService/appsettings.json
+/iconRoundCircle.gif
+/links.txt

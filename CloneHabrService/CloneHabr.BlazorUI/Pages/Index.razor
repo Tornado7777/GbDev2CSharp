@@ -1,9 +1,21 @@
 ﻿@page "/"
+@page "/home"
+@inject UserInfo userInfo
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Главная</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Заголовок</h1>
 
-Welcome to your new app.
+лента новостей / статей
 
 <SurveyPrompt Title="Ну и как тебе Блейзор?" />
+@code{
+
+    protected override void OnInitialized()
+    {
+
+        Console.WriteLine($"Index OnInitialized******************: {userInfo.LoginName}\n{userInfo.SessionId}\n{userInfo.UserId}\n{userInfo.Token}");
+
+    }
+
+}
