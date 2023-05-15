@@ -1,9 +1,84 @@
 ﻿@page "/register"
+@inject HttpClient httpClient
+@inject SessionDto userSession
+@inject UserInfo userInfo
+@inject NavigationManager navigationManager
+@using CloneHabr.Dto.Requests;
+@using System.ComponentModel.DataAnnotations;
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
-This is the register page
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card mt-3 mb-3">
+            <div class="card-header">
+                <h2>Register</h2>
+            </div>
+            <div class="card-body">
+                <EditForm Model="registrationRequest" OnValidSubmit="SubmitForm">
+                    <Errors ErrorText=@errorText></Errors>
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <label>New user login</label>
+                    <InputText @bind-Value="registrationRequest.Login" class="form-control" />
+                    <label>New user password</label>
+                    <InputText @bind-Value="registrationRequest.Password" type="password" class="form-control" />
+                    <label>Confirm password</label>
+                    <InputText @bind-Value="registrationRequest.ConfirmPassword" type="password" class="form-control" />
+                    <br />
+                    <button class="btn btn-primary" type="submit">Register</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 @code {
+    string errorText = string.Empty;
+    private CreateNewUserModel registrationRequest = new();
+
+    private async Task SubmitForm()
+    {
+        string uri = "api/Authenticate/registration";
+
+        using var response = await httpClient.PostAsJsonAsync<RegistrationRequest>(uri, registrationRequest);
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            var regResponse = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
+
+            if (regResponse.Status == RegistrationStatus.Success)
+            {
+                userInfo.LogIn(
+                    regResponse.Session.User.UserId,
+                    regResponse.Session.SessionId,
+                    regResponse.Session.User.Login,
+                    regResponse.Session.SessionToken);
+                navigationManager.NavigateTo("/home");
+            }
+            else if (regResponse.Status == RegistrationStatus.LoginBusy)
+            {
+                errorText = "Пользователь с таким именем уже зарегистрирован";
+            }
+            else if (regResponse.Status == RegistrationStatus.BadPassword)
+            {
+                errorText = "Пароль не удовлетворяет требованиям";
+            }
+            else
+            {
+                errorText = "Ошибка создания пользователя";
+            }
+        }
+
+    }
+
+    private class CreateNewUserModel : RegistrationRequest
+    {
+        [CompareAttribute("Password" , ErrorMessage = "Пароли не совпадают" )]
+        public string ConfirmPassword { get; set; }
+    }
 
 }

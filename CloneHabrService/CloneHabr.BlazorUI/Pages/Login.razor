@@ -3,23 +3,35 @@
 @inject SessionDto userSession
 @inject UserInfo userInfo
 @inject NavigationManager navigationManager
+@inject IJSRuntime JsRuntime
 @using CloneHabr.Dto.Requests;
 
 
 <PageTitle>Login</PageTitle>
 
-<h1>Login</h1>
-<div>
-    <EditForm Model="authenticationRequest" OnValidSubmit="SubmitForm">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <label>Login</label>
-        <InputText @bind-Value="authenticationRequest.Login" class="form-control"></InputText>
-        <label>Password</label>
-        <InputText @bind-Value="authenticationRequest.Password" type="password" class="form-control"></InputText>
-        <br />
-        <button class="btn btn-primary" type="submit">Login</button>
-    </EditForm>
+<div class="row justify-content-center" >
+    <div class="col-md-10" >
+        <div class="card mt-3 mb-3" >
+            <div class="card-header">
+                <h2>Login</h2>
+            </div>
+            <div class="card-body">
+
+            <EditForm Model="authenticationRequest" OnValidSubmit="SubmitForm">
+                <Errors ErrorText=@loginErrorText></Errors>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                
+                <label>Login</label>
+                <InputText @bind-Value="authenticationRequest.Login" class="form-control"></InputText>
+                <label>Password</label>
+                <InputText @bind-Value="authenticationRequest.Password" type="password" class="form-control"></InputText>
+                <br />
+                <button class="btn btn-primary" type="submit">Login</button>
+            </EditForm>
+            </div>
+        </div>
+    </div>
 </div>
 <br />
 
@@ -33,6 +45,7 @@ If not register yet...
 
 @code {
     AuthenticationRequest authenticationRequest = new();
+    string loginErrorText = string.Empty;
 
     private async Task SubmitForm()
     {
@@ -45,14 +58,18 @@ If not register yet...
 
             if (authResponse.Status == AuthenticationStatus.Success)
             {
-                //userSession = authResponse.Session; значение не сохраняется при выходе из метода, WTF???
-
                 userInfo.LogIn(
                     authResponse.Session.User.UserId,
                     authResponse.Session.SessionId,
                     authResponse.Session.User.Login,
                     authResponse.Session.SessionToken);
                 navigationManager.NavigateTo("/home");
+            }
+            else
+            {
+                //_ = await JsRuntime.InvokeAsync<bool>("prompt", "Login unsuccess");
+                //await JsRuntime.InvokeVoidAsync("alert", "Login unsuccess");
+                loginErrorText = "Неверное имя или пароль";
             }
 
         }
