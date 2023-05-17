@@ -1,5 +1,6 @@
 ﻿@page "/logout"
 @inject UserInfo userInfo
+@inject HttpClient httpClient
 @inject NavigationManager navigationManager
 <h2>User loggedout</h2>
 @code {
@@ -7,6 +8,7 @@
     {
         Console.WriteLine("Logout OnInitialized******************");
         Console.WriteLine($"userLoginName was: {userInfo.LoginName}");
+        httpClient.DefaultRequestHeaders.Remove("Authorization");
         userInfo.LogOut();
         Console.WriteLine($"userLoginName now is: {userInfo.LoginName}");
         navigationManager.NavigateTo("/home");
