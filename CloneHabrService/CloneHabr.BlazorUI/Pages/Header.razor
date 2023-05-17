@@ -1,7 +1,17 @@
 ﻿@inject SessionDto userSession
 @inject UserInfo userInfo
 
-<label>@userLoginName</label>
+<div style="@(userInfo.IsLoggedIn ? "display:block" : "display:none")">
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="cabinet">
+            <span class="oi oi-pencil me-2"></span> @userLoginName
+        </NavLink>
+
+    </div>
+
+</div>
+
+
 
 <div style="@(!userInfo.IsLoggedIn ? "display:block" : "display:none")">
     <NavLink class="nav-link" href="login" >
@@ -10,9 +20,12 @@
 </div>
 
 <div style="@(userInfo.IsLoggedIn ? "display:block" : "display:none")">
-    <NavLink class="nav-link" href="logout">
-        Logout
-    </NavLink>
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="logout">
+            <span class="oi oi-account-logout me-2"></span> Logout
+        </NavLink>
+
+    </div>
 </div>
 
 @code {
