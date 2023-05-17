@@ -1,5 +1,6 @@
 using CloneHabr.BlazorUI;
 using CloneHabr.Dto;
+using CloneHabr.Dto.Requests;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -15,6 +16,7 @@ public class Program
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
         builder.Services.AddSingleton<SessionDto>();
         builder.Services.AddSingleton<UserInfo>();
+        builder.Services.AddSingleton<CreationArticleRequest>();
 
         await builder.Build().RunAsync();
     }
