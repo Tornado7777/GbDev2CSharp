@@ -1,0 +1,45 @@
+﻿@page "/addnewarticle"
+@inject UserInfo userInfo
+@inject HttpClient httpClient
+@inject NavigationManager navigationManager
+@using CloneHabr.Dto.Requests;
+
+<h3>AddNewArticle</h3>
+
+<EditForm Model="creationArticleRequest" OnValidSubmit="SubmitForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label>Название</label>
+    <InputText @bind-Value="creationArticleRequest.Name" class="form-control" />
+    <br />
+    <InputTextArea @bind-Value="creationArticleRequest.Text" class="form-control" />
+    <br />
+    <button class="btn btn-primary" type="submit">Опубликовать</button>
+
+</EditForm>
+
+@code {
+    private CreationArticleRequest creationArticleRequest = new();
+
+    private async Task SubmitForm()
+    {
+        string uri = "api/Article/CreationArticle";
+
+        creationArticleRequest.LoginUser = userInfo.LoginName;
+
+        using var response = await httpClient.PostAsJsonAsync<CreationArticleRequest>(uri, creationArticleRequest);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine("Статья опубликована успешно");
+            navigationManager.NavigateTo("/cabinet");
+        }
+        else
+        {
+            Console.WriteLine("Ошибки при публикации");
+        }
+
+    }
+
+
+}

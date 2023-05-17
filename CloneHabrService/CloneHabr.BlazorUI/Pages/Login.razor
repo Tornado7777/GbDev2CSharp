@@ -10,7 +10,7 @@
 <PageTitle>Login</PageTitle>
 
 <div class="row justify-content-center" >
-    <div class="col-md-10" >
+    <div class="col-md-7" >
         <div class="card mt-3 mb-3" >
             <div class="card-header">
                 <h2>Login</h2>
@@ -29,19 +29,17 @@
                 <br />
                 <button class="btn btn-primary" type="submit">Login</button>
             </EditForm>
+            <br />
+            If not register yet...<NavLink class="nav-link" href="register">Register</NavLink>
             </div>
         </div>
+            
+            
+
     </div>
 </div>
 <br />
 
-<p>
-If not register yet...
-
-<NavLink class="nav-link" href="register">
-    Register
-</NavLink>
-</p>
 
 @code {
     AuthenticationRequest authenticationRequest = new();
@@ -64,6 +62,7 @@ If not register yet...
                     authResponse.Session.User.Login,
                     authResponse.Session.SessionToken);
                 navigationManager.NavigateTo("/home");
+                httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {userInfo.Token}");
             }
             else
             {
