@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
-using CloneHabr.Dto;
 
 namespace CloneHabrService.Controllers
 {
@@ -40,7 +39,7 @@ namespace CloneHabrService.Controllers
             _creationArticleRequestValidator = creationArticleRequestValidator;
         }
 
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("GetAricleById")]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
