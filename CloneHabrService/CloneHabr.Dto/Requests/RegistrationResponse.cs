@@ -1,4 +1,4 @@
-﻿namespace CloneHabrService.Models.Requests
+﻿namespace CloneHabr.Dto.Requests
 {
     public class RegistrationResponse
     {

@@ -1,6 +1,6 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">CloneHabr.BlazorUI</a>
+        <a class="navbar-brand" href="/home">CloneHabr.BlazorUI</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -8,13 +8,38 @@
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
+    <nav class="flex-row">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
+            <NavLink class="nav-link" href="/home" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Главная
             </NavLink>
         </div>
+
         <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/design" Match="NavLinkMatch.All">
+                <span class="oi oi-brush " aria-hidden="true"></span> Дизайн
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/webdev" Match="NavLinkMatch.All">
+                <span class="oi oi-browser" aria-hidden="true"></span> Web Dev
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/mobiledev" Match="NavLinkMatch.All">
+                <span class="oi oi-tablet" aria-hidden="true"></span> Mobile Dev
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/marketing" Match="NavLinkMatch.All">
+                <span class="oi oi-briefcase" aria-hidden="true"></span> Marketing
+            </NavLink>
+        </div>
+
+@*        <div class="nav-item px-3">
             <NavLink class="nav-link" href="counter">
                 <span class="oi oi-plus" aria-hidden="true"></span> Counter
             </NavLink>
@@ -23,7 +48,7 @@
             <NavLink class="nav-link" href="fetchdata">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
             </NavLink>
-        </div>
+        </div>*@
     </nav>
 </div>
 

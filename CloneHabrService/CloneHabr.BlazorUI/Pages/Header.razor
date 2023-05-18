@@ -1,0 +1,51 @@
+﻿@inject SessionDto userSession
+@inject UserInfo userInfo
+
+<div style="@(!userInfo.IsLoggedIn ? "display:block" : "display:none")">
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="login" >
+            <span class="oi oi-account-login me-2"></span> Login
+        </NavLink>
+    </div>
+</div>
+
+<div style="@(userInfo.IsLoggedIn ? "display:block" : "display:none")">
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="cabinet">
+            <span class="oi oi-pencil me-2"></span> @userLoginName
+        </NavLink>
+    </div>
+</div>
+
+<div style="@(userInfo.IsLoggedIn ? "display:block" : "display:none")">
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="logout">
+            <span class="oi oi-account-logout me-2"></span> Logout
+        </NavLink>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string userLoginName { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("Header OnInitialized******************");
+
+        Console.WriteLine($"userLoginName is: {userLoginName}");
+        //userLoginName = userInfo.LoginName;
+        Console.WriteLine($"UserInfoLogin is: {userInfo.LoginName}");
+        Console.WriteLine(userInfo.IsLoggedIn);
+    }
+
+    protected override void OnParametersSet()
+    {
+        Console.WriteLine("Header OnParametersSet******************");
+
+        Console.WriteLine($"userLoginName is: {userLoginName}");
+        //userLoginName = userInfo.LoginName;
+        Console.WriteLine($"UserInfoLogin is: {userInfo.LoginName}");
+        Console.WriteLine(userInfo.IsLoggedIn);
+    }
+}

@@ -1,5 +1,5 @@
-﻿using CloneHabrService.Models;
-using CloneHabrService.Models.Requests;
+﻿using CloneHabr.Dto;
+using CloneHabr.Dto.Requests;
 using CloneHabrService.Models.Validators;
 using CloneHabrService.Services;
 using CloneHabrService.Services.Impl;
@@ -39,7 +39,7 @@ namespace CloneHabrService.Controllers
             _creationArticleRequestValidator = creationArticleRequestValidator;
         }
 
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("GetAricleById")]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]

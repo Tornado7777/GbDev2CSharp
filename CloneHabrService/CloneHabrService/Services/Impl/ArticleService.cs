@@ -1,6 +1,6 @@
 ﻿using CloneHabr.Data;
-using CloneHabrService.Models;
-using CloneHabrService.Models.Requests;
+using CloneHabr.Dto;
+using CloneHabr.Dto.Requests;
 using System.Data;
 using Microsoft.IdentityModel.Tokens;
 using NLog.Fluent;
@@ -37,7 +37,7 @@ namespace CloneHabrService.Services.Impl
             var article = new Article { 
                 Name = creationArticleRequest.Name,
                 Text = creationArticleRequest.Text,
-                Status = "publicate",
+                Status = (int) CloneHabr.Dto.ArticleStatus.Moderation,
                 CreationDate = DateTime.Now,
                 User = user
             };

@@ -1,4 +1,4 @@
-﻿namespace CloneHabrService.Models
+﻿namespace CloneHabr.Dto
 {
     public class SessionDto
     {

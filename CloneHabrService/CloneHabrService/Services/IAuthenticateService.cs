@@ -1,5 +1,5 @@
-﻿using CloneHabrService.Models;
-using CloneHabrService.Models.Requests;
+﻿using CloneHabr.Dto;
+using CloneHabr.Dto.Requests;
 
 namespace CloneHabrService.Services
 {
@@ -9,5 +9,8 @@ namespace CloneHabrService.Services
 
         public SessionDto GetSession(string sessionToken);
         public RegistrationResponse Registration(RegistrationRequest registrationRequest);
+        public AccountResponse ChangeAccount(AccountDto accountDto);
+        public AccountResponse GetAccountByLogin(string login);
+        //public AccountResponse GetAccount();
     }
 }
