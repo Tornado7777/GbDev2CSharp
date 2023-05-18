@@ -244,6 +244,95 @@ namespace CloneHabrService.Services.Impl
                 .FirstOrDefault(user => user.Login == login);
         }
 
+        public AccountResponse ChangeAccount(AccountDto accountDto)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var user = context.Users.FirstOrDefault(u => u.Login == accountDto.Login);
+            var accountResponse = new AccountResponse { Account = accountDto};
+            if (user == null)
+            {
+                accountResponse.Status = AccountStatus.UserNotFound;
+                return accountResponse;
+            }
+            
+            var account = new Account
+            {
+                EMail = accountDto.EMail,
+                FirstName = accountDto.FirstName,
+                LastName = accountDto.LastName ?? "",
+                SecondName = accountDto.SecondName ?? "",
+                Birthday = accountDto.Birthday ?? DateTime.Now,
+                RegistrationDate = DateTime.Now,
+                Gender = (int) (accountDto.Gender ?? Gender.UncknowGender)
+            };
+            if (user.AccountId == null)
+            {
+                context.Accounts.Add(account);                
+            }
+            else
+            {
+                account.AccountId = user.AccountId ?? 0;
+                context.Accounts.Update(account);
+            }
 
+            if (context.SaveChanges() < 0)
+            {
+                accountResponse.Status = AccountStatus.ErrorSaveDB;
+                return accountResponse;
+            }
+            if (account.AccountId >0)
+            {
+                user.AccountId = account.AccountId;
+                context.Users.Update(user);
+                if (context.SaveChanges() < 0)
+                {
+                    accountResponse.Status = AccountStatus.ErrorSaveDB;
+                    return accountResponse;
+                }                
+            }
+
+
+            accountResponse.Status = AccountStatus.AccountChangeSuccess;
+            return accountResponse;
+        }
+
+        public AccountResponse GetAccountByLogin(string login)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var user = context.Users.FirstOrDefault(u => u.Login == login);
+            var accountResponse = new AccountResponse { Account = new AccountDto() };
+            if (user == null)
+            {
+                accountResponse.Status = AccountStatus.UserNotFound;
+                return accountResponse;
+            }
+            if(user.AccountId == null)
+            {
+                accountResponse.Status = AccountStatus.AccountNotFound;
+                return accountResponse;
+            }
+            var account = context.Accounts.FirstOrDefault(x => x.AccountId == user.AccountId);
+            if (account == null)
+            {
+                accountResponse.Status = AccountStatus.AccountNotFound;
+                return accountResponse;
+            }
+            accountResponse.Status = AccountStatus.AccountRead;
+            accountResponse.Account = new AccountDto { 
+                AccountId = account.AccountId,
+                Login = login,
+                EMail = account.EMail,
+                FirstName = account.FirstName,
+                LastName = account.LastName,
+                SecondName = account.SecondName,
+                Birthday = account.Birthday,
+                RegistrationDate = account.RegistrationDate,
+                Gender = (Gender) account.Gender,
+                Online = account.Online,
+            };
+            return accountResponse;
+        }
     }
 }
