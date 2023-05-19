@@ -122,6 +122,98 @@ namespace CloneHabrService.Controllers
                 articleDto = articleDto,
                 Status = CreationArticleStatus.AuthenticationHeaderValueParseError
             });
-        }        
+        }
+
+        [HttpPost]
+        [Route("GetArticlesByTheme")]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status200OK)]
+        public IActionResult GetArticlesByTheme([FromQuery] ArticleTheme articleTheme)
+        {
+            var authorizationHeader = Request.Headers[HeaderNames.Authorization];
+            var articlesLidResponse = new ArticlesLidResponse();
+            if (AuthenticationHeaderValue.TryParse(authorizationHeader, out var headerValue))
+            {
+                //var scheme = headerValue.Scheme; // Bearer
+                var sessionToken = headerValue.Parameter; // Token
+                //проверка на null или пустой
+                if (string.IsNullOrEmpty(sessionToken))
+                    return BadRequest(new ArticlesLidResponse
+                    {
+                        Status = ArtclesLidStatus.NullToken
+                    });
+                try
+                {
+                    articlesLidResponse.Articles = _articleService.GetArticlesByTheme(articleTheme);
+                    if(articlesLidResponse.Articles != null && articlesLidResponse.Articles.Count > 0)
+                    {
+                        articlesLidResponse.Status = ArtclesLidStatus.Success;
+                    }
+                    else
+                    {
+                        articlesLidResponse.Status = ArtclesLidStatus.NotFoundArticle;
+                    }
+                }
+                catch 
+                {
+                    return BadRequest(new ArticlesLidResponse
+                    {
+
+                        Status = ArtclesLidStatus.ErrorRead
+                    }); 
+                }
+            }
+            return Ok(articlesLidResponse);
+        }
+
+        [HttpPost]
+        [Route("GetArticlesLidByTheme")]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status200OK)]
+        public IActionResult GetArticlesLidByTheme([FromQuery] ArticleTheme articleTheme)
+        {
+            var authorizationHeader = Request.Headers[HeaderNames.Authorization];
+            int countCharInLead = 50;
+            var articlesLidResponse = new ArticlesLidResponse();
+            if (AuthenticationHeaderValue.TryParse(authorizationHeader, out var headerValue))
+            {
+                //var scheme = headerValue.Scheme; // Bearer
+                var sessionToken = headerValue.Parameter; // Token
+                //проверка на null или пустой
+                if (string.IsNullOrEmpty(sessionToken))
+                    return BadRequest(new ArticlesLidResponse
+                    {
+                        Status = ArtclesLidStatus.NullToken
+                    });
+                try
+                {
+                    articlesLidResponse.Articles = _articleService.GetArticlesByTheme(articleTheme);
+                    if (articlesLidResponse.Articles != null && articlesLidResponse.Articles.Count > 0)
+                    {
+                        articlesLidResponse.Status = ArtclesLidStatus.Success;
+                        foreach(var article in articlesLidResponse.Articles)
+                        {
+                            if(article.Text.Length > countCharInLead)
+                            {
+                                article.Text = article.Text.Substring(0, countCharInLead) + "...";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        articlesLidResponse.Status = ArtclesLidStatus.NotFoundArticle;
+                    }
+                }
+                catch
+                {
+                    return BadRequest(new ArticlesLidResponse
+                    {
+
+                        Status = ArtclesLidStatus.ErrorRead
+                    });
+                }
+            }
+            return Ok(articlesLidResponse);
+        }
     }
 }

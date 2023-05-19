@@ -6,5 +6,7 @@
         public string Text { get; set; }
         public string LoginUser { get; set; }
 
+        public int ArticleTheme { get; set; }
+
     }
 }

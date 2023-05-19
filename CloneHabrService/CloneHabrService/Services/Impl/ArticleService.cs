@@ -37,6 +37,7 @@ namespace CloneHabrService.Services.Impl
             var article = new Article { 
                 Name = creationArticleRequest.Name,
                 Text = creationArticleRequest.Text,
+                ArticleTheme = creationArticleRequest.ArticleTheme,
                 Status = (int) CloneHabr.Dto.ArticleStatus.Moderation,
                 CreationDate = DateTime.Now,
                 User = user
@@ -55,6 +56,7 @@ namespace CloneHabrService.Services.Impl
                     Id = article.Id,
                     Status = article.Status,
                     Name = article.Name,
+                    ArticleTheme = article.ArticleTheme,
                     Text = article.Text,
                     CreationDate = article.CreationDate,
                     LoginUser = creationArticleRequest.LoginUser
@@ -64,11 +66,31 @@ namespace CloneHabrService.Services.Impl
 
         }
 
-        public List<ArticleDto> GetAll()
+        /// <summary>
+        /// Метод получает список из 10 статей по заданной теме (0 -по всем)
+        /// в обратном порядке по времени создания
+        /// </summary>
+        /// <param name="artclesLidStatus"></param>
+        /// <returns></returns>
+        public List<ArticleDto> GetArticlesByTheme(ArticleTheme articlesTheme)
         {
             using IServiceScope scope = _serviceScopeFactory.CreateScope();
             ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
-            var articles = context.Articles;
+            var articles = new List<Article>();
+            if (articlesTheme == ArticleTheme.All)
+            {
+                articles = (from article in context.Articles
+                                    orderby article.CreationDate descending
+                                    select article).Take(10).ToList();
+            }
+            else
+            {
+                articles = (from article in context.Articles
+                                where article.ArticleTheme == (int)articlesTheme
+                                orderby article.CreationDate descending
+                                select article).Take(10).ToList();
+            }
+
             if(!articles.Any())
             {
                 return null;
@@ -96,12 +118,15 @@ namespace CloneHabrService.Services.Impl
                 {
                     return null;
                 }
+                var loginUser = context.Users.FirstOrDefault(x => x.UserId == article.Id).Login;
                 articlesDto.Add(new ArticleDto
                 {
                     Id = article.Id,
                     Name = article.Name,
                     Text = article.Text,
+                    ArticleTheme = article.ArticleTheme,
                     Status = article.Status,
+                    LoginUser = loginUser,
                     CreationDate = article.CreationDate,
                     Comments = commnetDto
                 });
@@ -143,6 +168,7 @@ namespace CloneHabrService.Services.Impl
                 Name = article.Name,
                 Text = article.Text,
                 Status = article.Status,
+                ArticleTheme = article.ArticleTheme,
                 CreationDate = article.CreationDate,
                 LoginUser = article.User.Login,
                 Comments = commnetDto
