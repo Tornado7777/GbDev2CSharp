@@ -20,6 +20,7 @@ namespace CloneHabr.Data
 
         [Column(TypeName = "datetime2")]
         public DateTime CreationDate { get; set; }
+        public int Raiting { get; set; }
 
         public ICollection<Comment> Comments { get; set; }
 

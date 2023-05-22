@@ -17,6 +17,7 @@ namespace CloneHabr.Dto
         public string? SecondName { get; set; }
         public DateTime? Birthday { get; set; }
         public DateTime? RegistrationDate { get; set; }
+        public int Raiting { get; set; }
 
         public bool? Online { get; set; }
 
