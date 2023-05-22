@@ -30,7 +30,7 @@ namespace CloneHabr.Data
 
         public int Gender { get; set; }
 
-        public int Raiting { get; set; }
+        public int? Raiting { get; set; }
 
     }
 }

@@ -2,11 +2,9 @@
 using CloneHabr.Dto.Requests;
 using CloneHabrService.Models.Validators;
 using CloneHabrService.Services;
-using CloneHabrService.Services.Impl;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using System.IdentityModel.Tokens.Jwt;
@@ -124,7 +122,94 @@ namespace CloneHabrService.Controllers
             });
         }
 
-        [HttpPost]
+        [HttpGet]
+        [Route("GetArticles")]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status200OK)]
+        public IActionResult GetArticles()
+        {
+            var authorizationHeader = Request.Headers[HeaderNames.Authorization];
+            var articlesLidResponse = new ArticlesLidResponse();
+            if (AuthenticationHeaderValue.TryParse(authorizationHeader, out var headerValue))
+            {
+                //var scheme = headerValue.Scheme; // Bearer
+                var sessionToken = headerValue.Parameter; // Token
+                //проверка на null или пустой
+                if (string.IsNullOrEmpty(sessionToken))
+                    return BadRequest(new ArticlesLidResponse
+                    {
+                        Status = ArtclesLidStatus.NullToken
+                    });
+                try
+                {
+                    JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+                    var jwt = tokenHandler.ReadJwtToken(sessionToken);
+                    string login = jwt.Claims.First(c => c.Type == "unique_name").Value;
+                    articlesLidResponse.Articles = _articleService.GetArticlesByLogin(login);
+                    if (articlesLidResponse.Articles != null && articlesLidResponse.Articles.Count > 0)
+                    {
+                        articlesLidResponse.Status = ArtclesLidStatus.Success;
+                    }
+                    else
+                    {
+                        articlesLidResponse.Status = ArtclesLidStatus.NotFoundArticle;
+                    }
+                }
+                catch
+                {
+                    return BadRequest(new ArticlesLidResponse
+                    {
+
+                        Status = ArtclesLidStatus.ErrorRead
+                    });
+                }
+            }
+            return Ok(articlesLidResponse);
+        }
+
+        [HttpGet]
+        [Route("GetArticlesByLogin")]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status200OK)]
+        public IActionResult GetArticlesByLogin([FromQuery] string login)
+        {
+            var authorizationHeader = Request.Headers[HeaderNames.Authorization];
+            var articlesLidResponse = new ArticlesLidResponse();
+            if (AuthenticationHeaderValue.TryParse(authorizationHeader, out var headerValue))
+            {
+                //var scheme = headerValue.Scheme; // Bearer
+                var sessionToken = headerValue.Parameter; // Token
+                //проверка на null или пустой
+                if (string.IsNullOrEmpty(sessionToken))
+                    return BadRequest(new ArticlesLidResponse
+                    {
+                        Status = ArtclesLidStatus.NullToken
+                    });
+                try
+                {
+                    articlesLidResponse.Articles = _articleService.GetArticlesByLogin(login);
+                    if (articlesLidResponse.Articles != null && articlesLidResponse.Articles.Count > 0)
+                    {
+                        articlesLidResponse.Status = ArtclesLidStatus.Success;
+                    }
+                    else
+                    {
+                        articlesLidResponse.Status = ArtclesLidStatus.NotFoundArticle;
+                    }
+                }
+                catch
+                {
+                    return BadRequest(new ArticlesLidResponse
+                    {
+
+                        Status = ArtclesLidStatus.ErrorRead
+                    });
+                }
+            }
+            return Ok(articlesLidResponse);
+        }
+
+        [HttpGet]
         [Route("GetArticlesByTheme")]
         [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status200OK)]
@@ -166,7 +251,7 @@ namespace CloneHabrService.Controllers
             return Ok(articlesLidResponse);
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("GetArticlesLidByTheme")]
         [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status200OK)]

@@ -2,11 +2,6 @@
 using CloneHabr.Dto;
 using CloneHabr.Dto.Requests;
 using System.Data;
-using Microsoft.IdentityModel.Tokens;
-using NLog.Fluent;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloneHabrService.Services.Impl
@@ -57,7 +52,7 @@ namespace CloneHabrService.Services.Impl
                     Id = article.Id,
                     Status = article.Status,
                     Name = article.Name,
-                    Raiting = article.Raiting,
+                    Raiting = article.Raiting ?? 0,
                     ArticleTheme = article.ArticleTheme,
                     Text = article.Text,
                     CreationDate = article.CreationDate,
@@ -110,7 +105,7 @@ namespace CloneHabrService.Services.Impl
                         {
                             Id = comment.Id,
                             Text = comment.Text,
-                            Raiting = comment.Raiting,
+                            Raiting = comment.Raiting ?? 0,
                             CreationDate = comment.CreationDate,
                             OwnerUser = comment.User.Login
                         });
@@ -121,14 +116,14 @@ namespace CloneHabrService.Services.Impl
                 {
                     return null;
                 }
-                var loginUser = context.Users.FirstOrDefault(x => x.UserId == article.Id).Login;
+                var loginUser = context.Users.FirstOrDefault(x => x.UserId == article.UserId).Login;
                 articlesDto.Add(new ArticleDto
                 {
                     Id = article.Id,
                     Name = article.Name,
                     Text = article.Text,
                     ArticleTheme = article.ArticleTheme,
-                    Raiting = article.Raiting, 
+                    Raiting = article.Raiting ?? 0, 
                     Status = article.Status,
                     LoginUser = loginUser,
                     CreationDate = article.CreationDate,
@@ -136,6 +131,66 @@ namespace CloneHabrService.Services.Impl
                 });
             }
             return articlesDto;            
+        }
+
+        /// <summary>
+        /// Метод получает список по логину
+        /// </summary>
+        /// <param name="login"></param>
+        /// <returns></returns>
+        public List<ArticleDto> GetArticlesByLogin(string login)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var articles = (from article in context.Articles
+                            orderby article.CreationDate descending
+                            where article.User.Login == login
+                            select article).ToList();
+            
+
+            if (!articles.Any())
+            {
+                return null;
+            }
+            var articlesDto = new List<ArticleDto>();
+            foreach (var article in articles)
+            {
+                var comments = context.Comments.Where(art => art.ArticleId == article.Id).ToList();
+                var commnetDto = new List<CommentDto>();
+                if (comments.Any())
+                {
+                    foreach (var comment in comments)
+                    {
+                        commnetDto.Add(new CommentDto
+                        {
+                            Id = comment.Id,
+                            Text = comment.Text,
+                            Raiting = comment.Raiting ?? 0,
+                            CreationDate = comment.CreationDate,
+                            OwnerUser = comment.User.Login
+                        });
+                    }
+                }
+                //здесь также можно сделать проверку статуса статьи
+                if (article == null)
+                {
+                    return null;
+                }
+
+                articlesDto.Add(new ArticleDto
+                {
+                    Id = article.Id,
+                    Name = article.Name,
+                    Text = article.Text,
+                    ArticleTheme = article.ArticleTheme,
+                    Raiting = article.Raiting ?? 0,
+                    Status = article.Status,
+                    LoginUser = login,
+                    CreationDate = article.CreationDate,
+                    Comments = commnetDto
+                });
+            }
+            return articlesDto;
         }
 
         public ArticleDto GetById(int id)
@@ -161,7 +216,7 @@ namespace CloneHabrService.Services.Impl
                     {
                         Id = comment.Id,
                         Text = comment.Text,
-                        Raiting = comment.Raiting,
+                        Raiting = comment.Raiting ?? 0,
                         CreationDate = comment.CreationDate,
                         OwnerUser = comment.User.Login
                     });
@@ -173,7 +228,7 @@ namespace CloneHabrService.Services.Impl
                 Name = article.Name,
                 Text = article.Text,
                 Status = article.Status,
-                Raiting = article.Raiting,
+                Raiting = article.Raiting ?? 0,
                 ArticleTheme = article.ArticleTheme,
                 CreationDate = article.CreationDate,
                 LoginUser = article.User.Login,
