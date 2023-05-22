@@ -17,5 +17,7 @@ namespace CloneHabr.Data.Entity
 
         [ForeignKey(nameof(Comment))]
         public int? IdComment { get; set; }
+        [ForeignKey(nameof(User))]
+        public int? IdUser { get; set; }
     }
 }

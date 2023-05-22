@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CloneHabr.Dto.@enum;
+using CloneHabr.Dto.Status;
+using System.ComponentModel.DataAnnotations;
 
 namespace CloneHabr.Dto
 {

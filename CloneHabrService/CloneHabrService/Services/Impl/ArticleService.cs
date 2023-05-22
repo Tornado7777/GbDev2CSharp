@@ -3,6 +3,9 @@ using CloneHabr.Dto;
 using CloneHabr.Dto.Requests;
 using System.Data;
 using Microsoft.EntityFrameworkCore;
+using CloneHabr.Dto.Status;
+using CloneHabr.Data.Entity;
+using CloneHabr.Dto.@enum;
 
 namespace CloneHabrService.Services.Impl
 {
@@ -34,7 +37,7 @@ namespace CloneHabrService.Services.Impl
                 Text = creationArticleRequest.Text,
                 Raiting = 0,
                 ArticleTheme = creationArticleRequest.ArticleTheme,
-                Status = (int) CloneHabr.Dto.ArticleStatus.Moderation,
+                Status = (int)ArticleStatus.Moderation,
                 CreationDate = DateTime.Now,
                 User = user
             };
@@ -233,6 +236,60 @@ namespace CloneHabrService.Services.Impl
                 CreationDate = article.CreationDate,
                 LoginUser = article.User.Login,
                 Comments = commnetDto
+            };
+        }
+
+        public LikeDto CreateLikeArticleById(int articleId, string login)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var user = context.Users.FirstOrDefault(u => u.Login == login);
+            var article = context.Articles.FirstOrDefault(u => u.Id == articleId);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+            if (article == null)
+            {
+                throw new Exception("Article not found");
+            }
+            var like = context.Likes.FirstOrDefault(u => u.Id == articleId && u.IdUser == user.UserId);
+            if (like == null)
+            {
+                like = new Like
+                {
+                    CreationDate = DateTime.Now,
+                    IdArticle = articleId,
+                    IdUser = user.UserId
+
+                };
+                context.Likes.Add(like);
+                if (context.SaveChanges() < 0)
+                {
+                    throw new Exception("Don't save like in DB");
+                }
+                //добавляю к рейтингу пользователя создавшего статью
+                var userAccountId = context.Users.FirstOrDefault(x => x.UserId == article.UserId)?.AccountId ?? 0;
+                var account = context.Accounts.FirstOrDefault(x => x.AccountId == userAccountId);
+                if (account == null || userAccountId == 0)
+                {
+                    throw new Exception("Don't found user account Id or account ");
+                }
+                account.Raiting = (account.Raiting ?? 0) + 1;
+                context.Accounts.Update(account);
+                if (context.SaveChanges() < 0)
+                {
+                    throw new Exception("Don't save raiting account in DB");
+                }
+            }
+            
+
+            return new LikeDto
+            {
+               Id = like.Id,
+               IdArticle = like.IdArticle,
+               CreationDate = like.CreationDate,
+               Login = login
             };
         }
     }

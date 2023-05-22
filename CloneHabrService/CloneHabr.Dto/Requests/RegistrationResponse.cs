@@ -1,4 +1,6 @@
-﻿namespace CloneHabr.Dto.Requests
+﻿using CloneHabr.Dto.Status;
+
+namespace CloneHabr.Dto.Requests
 {
     public class RegistrationResponse
     {
