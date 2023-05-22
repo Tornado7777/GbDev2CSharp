@@ -57,6 +57,11 @@
                     regResponse.Session.SessionId,
                     regResponse.Session.User.Login,
                     regResponse.Session.SessionToken);
+
+                #region Login user if success
+                LogInUser(registrationRequest.Login, registrationRequest.Password);
+                #endregion
+
                 navigationManager.NavigateTo("/home");
             }
             else if (regResponse.Status == RegistrationStatus.LoginBusy)
@@ -72,7 +77,15 @@
                 errorText = "Ошибка создания пользователя";
             }
         }
+    }
 
+    private async void LogInUser(string login, string password)
+    {
+        string uri = "api/Authenticate/login";
+        AuthenticationRequest authenticationRequest = new(){ Login = login, Password = password };
+
+        using var response = await httpClient.PostAsJsonAsync<AuthenticationRequest>(uri, authenticationRequest);
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {userInfo.Token}");
     }
 
     private class CreateNewUserModel : RegistrationRequest
