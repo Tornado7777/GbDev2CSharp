@@ -61,8 +61,8 @@
                     authResponse.Session.SessionId,
                     authResponse.Session.User.Login,
                     authResponse.Session.SessionToken);
-                navigationManager.NavigateTo("/home");
                 httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {userInfo.Token}");
+                navigationManager.NavigateTo("/home");
             }
             else
             {

@@ -1,0 +1,88 @@
+﻿@inject HttpClient httpClient
+@inject IJSRuntime JsRuntime
+@using CloneHabr.Dto.Requests
+
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="/cabinet" @onclick="OnClickShowEditUserForm">
+        <span class="oi oi-briefcase me-2"></span>Информация о пользователе
+    </NavLink>
+</div>
+
+<div style="@(showEditUserForm ? "display:block" : "display:none")">
+
+    <h3>Edit Account</h3>
+    <EditForm Model="accountResponse" OnValidSubmit="SubmitForm"  >
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <label>Имя</label>
+        <InputText @bind-Value="accountResponse.Account.FirstName" class="form-control" />
+        <br />
+        <label>Отчество</label>
+        <InputText @bind-Value="accountResponse.Account.SecondName" class="form-control" />
+        <br />
+        <label>Фамилия</label>
+        <InputText @bind-Value="accountResponse.Account.LastName" class="form-control" />
+        <br />
+        <label>Электропочта</label>
+        <InputText @bind-Value="accountResponse.Account.EMail" class="form-control" />
+        <br />
+        <label>Дата рождения</label>
+        <InputDate @bind-Value="accountResponse.Account.Birthday" class="form-control" />
+        <br />
+
+        <label>Пол</label>
+        <InputSelect @bind-Value="accountResponse.Account.Gender" class="form-control">
+            <option value="UncknowGender">Я не знаю</option>
+            <option value="Man">Мужчина</option>
+            <option value="Woman">Женщина</option>
+        </InputSelect>
+        <br />
+        
+        <button class="btn btn-primary" type="submit">Обновить данные</button>
+        <button class="btn btn-secondary" type="reset">Отмена</button>
+    </EditForm>
+
+</div>
+
+
+@code {
+    private bool showEditUserForm = false;
+
+    private AccountResponse accountResponse = new();
+
+    protected async override void OnInitialized()
+    {
+        string uriGetAccount = "api/Authenticate/GetAccount";
+        accountResponse.Account = new();
+        var response = await httpClient.GetFromJsonAsync<AccountResponse>(uriGetAccount);
+        if (response is not null)
+        {
+            accountResponse = response;
+        }
+    }
+
+    private async Task SubmitForm()
+    {
+        string uriUpdateAccount = "api/Authenticate/ChangeAccount";
+
+        using var response = await httpClient.PostAsJsonAsync<AccountDto>(uriUpdateAccount, accountResponse.Account);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine("UpdateAccount OK");
+        }
+        else
+        {
+            Console.WriteLine("UpdateAccount ERROR");
+        }
+
+        showEditUserForm = !showEditUserForm;
+    }
+
+    private  void OnClickShowEditUserForm()
+    {
+        showEditUserForm = !showEditUserForm;
+    }
+
+}
