@@ -9,7 +9,7 @@ namespace CloneHabr.Dto
 
         public string Name { get; set; }
         public int ArticleTheme { get; set; }
-
+        public int Raiting { get; set; }
         public int Status { get; set; }
 
         public string Text { get; set; }

@@ -37,6 +37,7 @@ namespace CloneHabrService.Services.Impl
             var article = new Article { 
                 Name = creationArticleRequest.Name,
                 Text = creationArticleRequest.Text,
+                Raiting = 0,
                 ArticleTheme = creationArticleRequest.ArticleTheme,
                 Status = (int) CloneHabr.Dto.ArticleStatus.Moderation,
                 CreationDate = DateTime.Now,
@@ -56,6 +57,7 @@ namespace CloneHabrService.Services.Impl
                     Id = article.Id,
                     Status = article.Status,
                     Name = article.Name,
+                    Raiting = article.Raiting,
                     ArticleTheme = article.ArticleTheme,
                     Text = article.Text,
                     CreationDate = article.CreationDate,
@@ -108,6 +110,7 @@ namespace CloneHabrService.Services.Impl
                         {
                             Id = comment.Id,
                             Text = comment.Text,
+                            Raiting = comment.Raiting,
                             CreationDate = comment.CreationDate,
                             OwnerUser = comment.User.Login
                         });
@@ -125,6 +128,7 @@ namespace CloneHabrService.Services.Impl
                     Name = article.Name,
                     Text = article.Text,
                     ArticleTheme = article.ArticleTheme,
+                    Raiting = article.Raiting, 
                     Status = article.Status,
                     LoginUser = loginUser,
                     CreationDate = article.CreationDate,
@@ -157,6 +161,7 @@ namespace CloneHabrService.Services.Impl
                     {
                         Id = comment.Id,
                         Text = comment.Text,
+                        Raiting = comment.Raiting,
                         CreationDate = comment.CreationDate,
                         OwnerUser = comment.User.Login
                     });
@@ -168,6 +173,7 @@ namespace CloneHabrService.Services.Impl
                 Name = article.Name,
                 Text = article.Text,
                 Status = article.Status,
+                Raiting = article.Raiting,
                 ArticleTheme = article.ArticleTheme,
                 CreationDate = article.CreationDate,
                 LoginUser = article.User.Login,
