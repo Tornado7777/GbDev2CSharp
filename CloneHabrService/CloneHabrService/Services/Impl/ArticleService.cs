@@ -295,6 +295,11 @@ namespace CloneHabrService.Services.Impl
                     return likeResponse;
                 }
             }
+            else
+            {
+                likeResponse.Status = LikeStatus.UserLikeExists;
+                return likeResponse;
+            }
             likeResponse.Status = LikeStatus.AddLike;
             likeResponse.Like = new LikeDto
             {
