@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CloneHabr.Dto
+namespace CloneHabr.Dto.Status
 {
     public enum ArtclesLidStatus
     {

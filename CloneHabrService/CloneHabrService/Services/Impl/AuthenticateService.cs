@@ -1,11 +1,13 @@
 ﻿using CloneHabr.Data;
 using CloneHabr.Dto;
 using CloneHabr.Dto.Requests;
+using CloneHabr.Dto.@enum;
 using Microsoft.IdentityModel.Tokens;
 using NLog.Fluent;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using CloneHabr.Dto.Status;
 
 namespace CloneHabrService.Services.Impl
 {

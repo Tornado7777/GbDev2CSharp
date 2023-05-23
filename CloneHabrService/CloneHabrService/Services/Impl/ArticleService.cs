@@ -3,6 +3,9 @@ using CloneHabr.Dto;
 using CloneHabr.Dto.Requests;
 using System.Data;
 using Microsoft.EntityFrameworkCore;
+using CloneHabr.Dto.Status;
+using CloneHabr.Data.Entity;
+using CloneHabr.Dto.@enum;
 
 namespace CloneHabrService.Services.Impl
 {
@@ -34,7 +37,7 @@ namespace CloneHabrService.Services.Impl
                 Text = creationArticleRequest.Text,
                 Raiting = 0,
                 ArticleTheme = creationArticleRequest.ArticleTheme,
-                Status = (int) CloneHabr.Dto.ArticleStatus.Moderation,
+                Status = (int)ArticleStatus.Moderation,
                 CreationDate = DateTime.Now,
                 User = user
             };
@@ -234,6 +237,74 @@ namespace CloneHabrService.Services.Impl
                 LoginUser = article.User.Login,
                 Comments = commnetDto
             };
+        }
+
+        public LikeResponse CreateLikeArticleById(int articleId, string login)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var user = context.Users.FirstOrDefault(u => u.Login == login);
+            var article = context.Articles.FirstOrDefault(u => u.Id == articleId);
+            var likeResponse = new LikeResponse();
+            if (user == null)
+            {
+                likeResponse.Status = LikeStatus.UserNotFound;
+                return likeResponse;
+            }
+            if (article == null)
+            {
+                likeResponse.Status = LikeStatus.ArticleNotFound;
+                return likeResponse;
+            }
+            var like = context.Likes.FirstOrDefault(u => u.Id == articleId && u.IdUser == user.UserId);
+            if (like == null)
+            {
+                like = new Like
+                {
+                    CreationDate = DateTime.Now,
+                    IdArticle = articleId,
+                    IdUser = user.UserId
+
+                };
+                context.Likes.Add(like);
+                if (context.SaveChanges() < 0)
+                {
+                    likeResponse.Status = LikeStatus.DontSaveLikeDB;
+                    likeResponse.Like = new LikeDto { 
+                        CreationDate = like.CreationDate,
+                        IdArticle = like.IdArticle,
+                        Login = login
+                    };
+                    return likeResponse;
+                }
+                //добавляю к рейтингу пользователя создавшего статью
+                var userAccountId = context.Users.FirstOrDefault(x => x.UserId == article.UserId)?.AccountId ?? 0;
+                var account = context.Accounts.FirstOrDefault(x => x.AccountId == userAccountId);
+                if (account == null || userAccountId == 0)
+                {
+                    likeResponse.Status = LikeStatus.NotFoundUserAccountIdOrAccount;
+                    return likeResponse;
+                }
+                account.Raiting = (account.Raiting ?? 0) + 1;
+                article.Raiting = (article.Raiting ?? 0) + 1;
+                context.Accounts.Update(account);
+                context.Articles.Update(article);
+                if (context.SaveChanges() < 0)
+                {
+                    likeResponse.Status = LikeStatus.NotSaveRaitingAccountOrArticle;
+                    return likeResponse;
+                }
+            }
+            likeResponse.Status = LikeStatus.AddLike;
+            likeResponse.Like = new LikeDto
+            {
+                Id = like.Id,
+                IdArticle = like.IdArticle,
+                CreationDate = like.CreationDate,
+                Login = login
+            };
+
+            return likeResponse;
         }
     }
 }

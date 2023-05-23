@@ -1,4 +1,4 @@
-﻿namespace CloneHabr.Dto
+﻿namespace CloneHabr.Dto.@enum
 {
     public enum Gender
     {

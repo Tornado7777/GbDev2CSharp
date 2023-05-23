@@ -1,5 +1,7 @@
 ﻿using CloneHabr.Dto;
 using CloneHabr.Dto.Requests;
+using CloneHabr.Dto.Status;
+using CloneHabr.Dto.@enum;
 using CloneHabrService.Models.Validators;
 using CloneHabrService.Services;
 using FluentValidation;
@@ -299,6 +301,48 @@ namespace CloneHabrService.Controllers
                 }
             }
             return Ok(articlesLidResponse);
+        }
+
+        [HttpGet]
+        [Route("AddLikeArticleById")]
+        [ProducesResponseType(typeof(LikeResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(LikeResponse), StatusCodes.Status200OK)]
+        public IActionResult AddLikeArticleById([FromQuery] int articleId)
+        {
+            var authorizationHeader = Request.Headers[HeaderNames.Authorization];
+            var likeResponse = new LikeResponse();
+            if (AuthenticationHeaderValue.TryParse(authorizationHeader, out var headerValue))
+            {
+                //var scheme = headerValue.Scheme; // Bearer
+                var sessionToken = headerValue.Parameter; // Token
+                //проверка на null или пустой
+                if (string.IsNullOrEmpty(sessionToken))
+                    return BadRequest(new LikeResponse
+                    {
+                        Status = LikeStatus.NullToken
+                    });
+                try
+                {
+                    JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+                    var jwt = tokenHandler.ReadJwtToken(sessionToken);
+                    string login = jwt.Claims.First(c => c.Type == "unique_name").Value;
+                    likeResponse = _articleService.CreateLikeArticleById(articleId ,login);
+                    if (likeResponse == null)
+                    {                        
+                        likeResponse.Status = LikeStatus.ErrorAddLike;
+                    }
+                    
+                }
+                catch
+                {
+                    return BadRequest(new LikeResponse
+                    {
+
+                        Status = LikeStatus.ErrorRead
+                    });
+                }
+            }
+            return Ok(likeResponse);
         }
     }
 }
