@@ -11,6 +11,6 @@ namespace CloneHabrService.Services
         public List<ArticleDto> GetArticlesByLogin(string login);
         public ArticleDto GetById(int id);
 
-        public LikeDto CreateLikeArticleById(int articleId, string login);
+        public LikeResponse CreateLikeArticleById(int articleId, string login);
     }
 }

@@ -326,20 +326,12 @@ namespace CloneHabrService.Controllers
                     JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
                     var jwt = tokenHandler.ReadJwtToken(sessionToken);
                     string login = jwt.Claims.First(c => c.Type == "unique_name").Value;
-                    likeResponse.Like = _articleService.CreateLikeArticleById(articleId ,login);
-                    if (likeResponse.Like != null)
-                    {
-                        likeResponse.Status = LikeStatus.Success;
-                    }
-                    else
-                    {
+                    likeResponse = _articleService.CreateLikeArticleById(articleId ,login);
+                    if (likeResponse == null)
+                    {                        
                         likeResponse.Status = LikeStatus.ErrorAddLike;
                     }
-                    if(likeResponse.Like.CreationDate.AddMinutes(1) < DateTime.Now)
-                    {
-                        likeResponse.Status = LikeStatus.DontLikeThisUser;
-                        likeResponse.Like = new LikeDto();
-                    }
+                    
                 }
                 catch
                 {
