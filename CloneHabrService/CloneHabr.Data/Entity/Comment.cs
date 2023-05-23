@@ -22,6 +22,6 @@ namespace CloneHabr.Data
         public int? UserId { get; set; }
         public User User { get; set; }
 
-        public int Raiting { get; set; }
+        public int? Raiting { get; set; }
     }
 }
