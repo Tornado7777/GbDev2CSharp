@@ -211,6 +211,7 @@ namespace CloneHabrService.Controllers
             return Ok(articlesLidResponse);
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("GetArticlesByTheme")]
         [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status400BadRequest)]
@@ -253,6 +254,7 @@ namespace CloneHabrService.Controllers
             return Ok(articlesLidResponse);
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("GetArticlesLidByTheme")]
         [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status400BadRequest)]
