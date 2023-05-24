@@ -221,6 +221,7 @@ namespace CloneHabrService.Services.Impl
                         Text = comment.Text,
                         Raiting = comment.Raiting ?? 0,
                         CreationDate = comment.CreationDate,
+                        ArticleId = comment.ArticleId ?? 0,
                         OwnerUser = comment.User.Login
                     });
                 }
@@ -310,6 +311,60 @@ namespace CloneHabrService.Services.Impl
             };
 
             return likeResponse;
+        }
+
+        public CommentResponse CreateCommnet(CommentDto commentDto, string login)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var user = context.Users.FirstOrDefault(u => u.Login == login);
+            var article = context.Articles.FirstOrDefault(u => u.Id == commentDto.ArticleId);
+            var commentResponse = new CommentResponse();
+            if (user == null)
+            {
+                commentResponse.Status = CommentStatus.UserNotFound;
+                return commentResponse;
+            }
+            if (article == null)
+            {
+                commentResponse.Status = CommentStatus.ArticleNotFound;
+                return commentResponse;
+            }
+            
+                var comment = new Comment
+                {
+                    CreationDate = DateTime.Now,
+                    ArticleId = commentDto.ArticleId,
+                    Text = commentDto.Text,
+                    User = user
+                };
+                context.Comments.Add(comment);
+                if (context.SaveChanges() < 0)
+                {
+                commentResponse.Status = CommentStatus.DontSaveCommentDB;
+                commentResponse.Comment = new CommentDto
+                    {
+                        CreationDate = comment.CreationDate,
+                        ArticleId = commentDto.ArticleId,
+                        Text = commentDto.Text,
+                        OwnerUser = login
+                    };
+                    return commentResponse;
+                }
+            //добавляю к рейтингу пользователя создавшего статью
+
+
+            commentResponse.Status = CommentStatus.AddComment;
+            commentResponse.Comment = new CommentDto
+            {
+                Id = comment.Id,
+                CreationDate = comment.CreationDate,
+                ArticleId = commentDto.ArticleId,
+                Text = commentDto.Text,
+                OwnerUser = login
+            };
+
+            return commentResponse;
         }
     }
 }
