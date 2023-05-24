@@ -330,5 +330,69 @@ namespace CloneHabrService.Controllers
             }
             return Ok(likeResponse);
         }
+
+        [HttpPost]
+        [Route("CreationComment")]
+        [ProducesResponseType(typeof(CommentResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(CommentResponse), StatusCodes.Status200OK)]
+        public IActionResult CreationComment([FromBody] CommentDto commentDto)
+        {
+
+            //ValidationResult validationResult = _creationArticleRequestValidator.Validate(creationArticleRequest);
+
+            //if (!validationResult.IsValid)
+            //{
+            //    return BadRequest(new CreationArticleResponse
+            //    {
+            //        Status = CreationArticleStatus.ErrorValidation,
+            //        ValidationResult = validationResult.ToDictionary()
+            //    });
+            //}
+
+
+
+            var authorizationHeader = Request.Headers[HeaderNames.Authorization];
+            if (AuthenticationHeaderValue.TryParse(authorizationHeader, out var headerValue))
+            {
+                //var scheme = headerValue.Scheme; // Bearer
+                var sessionToken = headerValue.Parameter; // Token
+                //проверка на null или пустой
+                if (string.IsNullOrEmpty(sessionToken))
+                    return BadRequest(new CommentResponse
+                    {
+                        Comment = commentDto,
+                        Status = CommentStatus.NullToken
+                    });
+                try
+                {
+                    JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+                    var jwt = tokenHandler.ReadJwtToken(sessionToken);
+                    //int userId = int.Parse(jwt.Claims.First(c => c.Type == "nameid").Value);
+                    string login = jwt.Claims.First(c => c.Type == "unique_name").Value;
+                    var commentResponse = _articleService.CreateCommnet(commentDto, login);
+                    if (commentResponse == null)
+                    {
+                        commentResponse.Status = CommentStatus.DontCreateComment;
+                        return BadRequest(commentResponse);
+                    }
+                    return Ok(commentResponse);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new CommentResponse
+                    {
+                        Comment = commentDto,
+                        Status = CommentStatus.ExceptionComment
+                    }); 
+                }
+
+            }
+
+            return Ok(new CommentResponse
+            {
+                Comment = commentDto,
+                Status = CommentStatus.AuthenticationHeaderValueParseError
+            });
+        }
     }
 }

@@ -12,5 +12,7 @@ namespace CloneHabrService.Services
         public ArticleDto GetById(int id);
 
         public LikeResponse CreateLikeArticleById(int articleId, string login);
+
+        public CommentResponse CreateCommnet(CommentDto commentDto,  string login);
     }
 }
