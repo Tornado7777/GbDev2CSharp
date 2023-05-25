@@ -1,13 +1,10 @@
 ﻿@using CloneHabr.Dto.Requests;
-@inject HttpClient httpClient
 
 @foreach (var item in articlesLidResponses)
 {
     <ArticleLid articleDto="@item" />
     <hr />
-    
 }
-
 
 @code {
     [Parameter]

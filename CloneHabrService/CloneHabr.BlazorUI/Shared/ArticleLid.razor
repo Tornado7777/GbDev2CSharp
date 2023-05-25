@@ -1,14 +1,18 @@
 ﻿<h5>@articleDto.Name</h5>
 Main text: @articleDto.Text
 Published: @articleDto.CreationDate
-
+<NavLink class="nav-link" href="@articleId">
+    Читать дальше
+</NavLink>
 @code {
     [Parameter]
     public ArticleDto articleDto { get; set; }
-
+    string articleId;
     protected override void OnInitialized()
     {
         Console.WriteLine("*********** ArticleDto.OnInitialized()" + articleDto.Name);
+        Console.WriteLine("ArticleDto.Id is " + articleDto.Id);
+        articleId = $"/article/{articleDto.Id}";
     }
 
 }
