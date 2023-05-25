@@ -1,0 +1,17 @@
+﻿@using CloneHabr.Dto.Requests;
+
+@foreach (var item in articlesLidResponses)
+{
+    <ArticleLid articleDto="@item" />
+    <hr />
+}
+
+@code {
+    [Parameter]
+    public List<ArticleDto> articlesLidResponses { get; set; }
+    
+    protected override async void OnParametersSet()
+    {
+        Console.WriteLine("*** running ArticleLidsList.OnParametersSet() ***");
+    }
+}

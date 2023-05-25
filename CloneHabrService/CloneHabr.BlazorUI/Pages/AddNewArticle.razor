@@ -16,6 +16,16 @@
     <EditForm Model="creationArticleRequest" OnValidSubmit="SubmitForm">
         <DataAnnotationsValidator />
         <ValidationSummary />
+        <label>Тема статьи</label>
+        <InputSelect @bind-Value="creationArticleRequest.ArticleTheme" class="form-control">
+            <option value="1">Дизайн</option>
+            <option value="2">Веб-разработка</option>
+            <option value="3">Мобильная разработка</option>
+            <option value="4">Маркетинг</option>
+
+        </InputSelect>
+
+
         <label>Название</label>
         <InputText @bind-Value="creationArticleRequest.Name" class="form-control" />
         <br />

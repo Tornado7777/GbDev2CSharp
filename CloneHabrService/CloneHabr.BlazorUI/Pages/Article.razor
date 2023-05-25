@@ -1,0 +1,36 @@
+﻿@page "/Article/{articleId:int}"
+@using CloneHabr.Dto.Requests;
+@inject HttpClient httpClient
+<h3>@articleDto.Name</h3>
+@articleDto.Text
+<br />
+Автор: @articleDto.LoginUser, @articleDto.CreationDate
+@code {
+    [Parameter]
+    public int articleId { get; set; }
+
+    ArticleDto articleDto = new();
+
+    protected override async void OnInitialized()
+    {
+        string uri = $"api/Article/GetAricleById?articleId={articleId}";
+        Console.WriteLine($"*** running Article.OnInitialized()\narticleId is {articleId}");
+
+        var articleDtoResponse = await httpClient.GetFromJsonAsync<GetByIdArticleResponse>(uri);
+        while (articleDtoResponse.Status != Dto.Status.GetByIdArticleStatus.Success)
+        {
+            //TODO придумать как-то по другому
+        }
+
+        articleDto = articleDtoResponse.articleDto;
+        StateHasChanged();
+
+    }
+
+    protected override void OnParametersSet()
+    {
+        Console.WriteLine($"*** running Article.OnParametersSet()\narticleId is {articleId}");
+    }
+
+
+}
