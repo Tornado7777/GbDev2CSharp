@@ -2,12 +2,10 @@
 using CloneHabr.Dto;
 using CloneHabr.Dto.Requests;
 using System.Data;
-using Microsoft.IdentityModel.Tokens;
-using NLog.Fluent;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
+using CloneHabr.Dto.Status;
+using CloneHabr.Data.Entity;
+using CloneHabr.Dto.@enum;
 
 namespace CloneHabrService.Services.Impl
 {
@@ -37,7 +35,9 @@ namespace CloneHabrService.Services.Impl
             var article = new Article { 
                 Name = creationArticleRequest.Name,
                 Text = creationArticleRequest.Text,
-                Status = (int) CloneHabr.Dto.ArticleStatus.Moderation,
+                Raiting = 0,
+                ArticleTheme = creationArticleRequest.ArticleTheme,
+                Status = (int)ArticleStatus.Moderation,
                 CreationDate = DateTime.Now,
                 User = user
             };
@@ -55,6 +55,8 @@ namespace CloneHabrService.Services.Impl
                     Id = article.Id,
                     Status = article.Status,
                     Name = article.Name,
+                    Raiting = article.Raiting ?? 0,
+                    ArticleTheme = article.ArticleTheme,
                     Text = article.Text,
                     CreationDate = article.CreationDate,
                     LoginUser = creationArticleRequest.LoginUser
@@ -64,11 +66,31 @@ namespace CloneHabrService.Services.Impl
 
         }
 
-        public List<ArticleDto> GetAll()
+        /// <summary>
+        /// Метод получает список из 10 статей по заданной теме (0 -по всем)
+        /// в обратном порядке по времени создания
+        /// </summary>
+        /// <param name="artclesLidStatus"></param>
+        /// <returns></returns>
+        public List<ArticleDto> GetArticlesByTheme(ArticleTheme articlesTheme)
         {
             using IServiceScope scope = _serviceScopeFactory.CreateScope();
             ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
-            var articles = context.Articles;
+            var articles = new List<Article>();
+            if (articlesTheme == ArticleTheme.All)
+            {
+                articles = (from article in context.Articles
+                                    orderby article.CreationDate descending
+                                    select article).Take(10).ToList();
+            }
+            else
+            {
+                articles = (from article in context.Articles
+                                where article.ArticleTheme == (int)articlesTheme
+                                orderby article.CreationDate descending
+                                select article).Take(10).ToList();
+            }
+
             if(!articles.Any())
             {
                 return null;
@@ -86,6 +108,7 @@ namespace CloneHabrService.Services.Impl
                         {
                             Id = comment.Id,
                             Text = comment.Text,
+                            Raiting = comment.Raiting ?? 0,
                             CreationDate = comment.CreationDate,
                             OwnerUser = comment.User.Login
                         });
@@ -96,17 +119,81 @@ namespace CloneHabrService.Services.Impl
                 {
                     return null;
                 }
+                var loginUser = context.Users.FirstOrDefault(x => x.UserId == article.UserId).Login;
                 articlesDto.Add(new ArticleDto
                 {
                     Id = article.Id,
                     Name = article.Name,
                     Text = article.Text,
+                    ArticleTheme = article.ArticleTheme,
+                    Raiting = article.Raiting ?? 0, 
                     Status = article.Status,
+                    LoginUser = loginUser,
                     CreationDate = article.CreationDate,
                     Comments = commnetDto
                 });
             }
             return articlesDto;            
+        }
+
+        /// <summary>
+        /// Метод получает список по логину
+        /// </summary>
+        /// <param name="login"></param>
+        /// <returns></returns>
+        public List<ArticleDto> GetArticlesByLogin(string login)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var articles = (from article in context.Articles
+                            orderby article.CreationDate descending
+                            where article.User.Login == login
+                            select article).ToList();
+            
+
+            if (!articles.Any())
+            {
+                return null;
+            }
+            var articlesDto = new List<ArticleDto>();
+            foreach (var article in articles)
+            {
+                var comments = context.Comments.Where(art => art.ArticleId == article.Id).ToList();
+                var commnetDto = new List<CommentDto>();
+                if (comments.Any())
+                {
+                    foreach (var comment in comments)
+                    {
+                        commnetDto.Add(new CommentDto
+                        {
+                            Id = comment.Id,
+                            Text = comment.Text,
+                            Raiting = comment.Raiting ?? 0,
+                            CreationDate = comment.CreationDate,
+                            OwnerUser = comment.User.Login
+                        });
+                    }
+                }
+                //здесь также можно сделать проверку статуса статьи
+                if (article == null)
+                {
+                    return null;
+                }
+
+                articlesDto.Add(new ArticleDto
+                {
+                    Id = article.Id,
+                    Name = article.Name,
+                    Text = article.Text,
+                    ArticleTheme = article.ArticleTheme,
+                    Raiting = article.Raiting ?? 0,
+                    Status = article.Status,
+                    LoginUser = login,
+                    CreationDate = article.CreationDate,
+                    Comments = commnetDto
+                });
+            }
+            return articlesDto;
         }
 
         public ArticleDto GetById(int id)
@@ -132,7 +219,9 @@ namespace CloneHabrService.Services.Impl
                     {
                         Id = comment.Id,
                         Text = comment.Text,
+                        Raiting = comment.Raiting ?? 0,
                         CreationDate = comment.CreationDate,
+                        ArticleId = comment.ArticleId ?? 0,
                         OwnerUser = comment.User.Login
                     });
                 }
@@ -143,10 +232,139 @@ namespace CloneHabrService.Services.Impl
                 Name = article.Name,
                 Text = article.Text,
                 Status = article.Status,
+                Raiting = article.Raiting ?? 0,
+                ArticleTheme = article.ArticleTheme,
                 CreationDate = article.CreationDate,
                 LoginUser = article.User.Login,
                 Comments = commnetDto
             };
+        }
+
+        public LikeResponse CreateLikeArticleById(int articleId, string login)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var user = context.Users.FirstOrDefault(u => u.Login == login);
+            var article = context.Articles.FirstOrDefault(u => u.Id == articleId);
+            var likeResponse = new LikeResponse();
+            if (user == null)
+            {
+                likeResponse.Status = LikeStatus.UserNotFound;
+                return likeResponse;
+            }
+            if (article == null)
+            {
+                likeResponse.Status = LikeStatus.ArticleNotFound;
+                return likeResponse;
+            }
+            var like = context.Likes.FirstOrDefault(u => u.Id == articleId && u.IdUser == user.UserId);
+            if (like == null)
+            {
+                like = new Like
+                {
+                    CreationDate = DateTime.Now,
+                    IdArticle = articleId,
+                    IdUser = user.UserId
+
+                };
+                context.Likes.Add(like);
+                if (context.SaveChanges() < 0)
+                {
+                    likeResponse.Status = LikeStatus.DontSaveLikeDB;
+                    likeResponse.Like = new LikeDto { 
+                        CreationDate = like.CreationDate,
+                        IdArticle = like.IdArticle,
+                        Login = login
+                    };
+                    return likeResponse;
+                }
+                //добавляю к рейтингу пользователя создавшего статью
+                var userAccountId = context.Users.FirstOrDefault(x => x.UserId == article.UserId)?.AccountId ?? 0;
+                var account = context.Accounts.FirstOrDefault(x => x.AccountId == userAccountId);
+                if (account == null || userAccountId == 0)
+                {
+                    likeResponse.Status = LikeStatus.NotFoundUserAccountIdOrAccount;
+                    return likeResponse;
+                }
+                account.Raiting = (account.Raiting ?? 0) + 1;
+                article.Raiting = (article.Raiting ?? 0) + 1;
+                context.Accounts.Update(account);
+                context.Articles.Update(article);
+                if (context.SaveChanges() < 0)
+                {
+                    likeResponse.Status = LikeStatus.NotSaveRaitingAccountOrArticle;
+                    return likeResponse;
+                }
+            }
+            else
+            {
+                likeResponse.Status = LikeStatus.UserLikeExists;
+                return likeResponse;
+            }
+            likeResponse.Status = LikeStatus.AddLike;
+            likeResponse.Like = new LikeDto
+            {
+                Id = like.Id,
+                IdArticle = like.IdArticle,
+                CreationDate = like.CreationDate,
+                Login = login
+            };
+
+            return likeResponse;
+        }
+
+        public CommentResponse CreateCommnet(CommentDto commentDto, string login)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var user = context.Users.FirstOrDefault(u => u.Login == login);
+            var article = context.Articles.FirstOrDefault(u => u.Id == commentDto.ArticleId);
+            var commentResponse = new CommentResponse();
+            if (user == null)
+            {
+                commentResponse.Status = CommentStatus.UserNotFound;
+                return commentResponse;
+            }
+            if (article == null)
+            {
+                commentResponse.Status = CommentStatus.ArticleNotFound;
+                return commentResponse;
+            }
+            
+                var comment = new Comment
+                {
+                    CreationDate = DateTime.Now,
+                    ArticleId = commentDto.ArticleId,
+                    Text = commentDto.Text,
+                    User = user
+                };
+                context.Comments.Add(comment);
+                if (context.SaveChanges() < 0)
+                {
+                commentResponse.Status = CommentStatus.DontSaveCommentDB;
+                commentResponse.Comment = new CommentDto
+                    {
+                        CreationDate = comment.CreationDate,
+                        ArticleId = commentDto.ArticleId,
+                        Text = commentDto.Text,
+                        OwnerUser = login
+                    };
+                    return commentResponse;
+                }
+            //добавляю к рейтингу пользователя создавшего статью
+
+
+            commentResponse.Status = CommentStatus.AddComment;
+            commentResponse.Comment = new CommentDto
+            {
+                Id = comment.Id,
+                CreationDate = comment.CreationDate,
+                ArticleId = commentDto.ArticleId,
+                Text = commentDto.Text,
+                OwnerUser = login
+            };
+
+            return commentResponse;
         }
     }
 }

@@ -1,25 +1,44 @@
-﻿@page "/addnewarticle"
-@inject UserInfo userInfo
+﻿@inject UserInfo userInfo
 @inject HttpClient httpClient
 @inject NavigationManager navigationManager
+@inject IJSRuntime JsRuntime
 @using CloneHabr.Dto.Requests;
 
-<h3>AddNewArticle</h3>
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="/cabinet" @onclick="OnClickTesting">
+        <span class="oi oi-plus me-2"></span>Новая статья
+    </NavLink>
+</div>
 
-<EditForm Model="creationArticleRequest" OnValidSubmit="SubmitForm">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-    <label>Название</label>
-    <InputText @bind-Value="creationArticleRequest.Name" class="form-control" />
-    <br />
-    <InputTextArea @bind-Value="creationArticleRequest.Text" class="form-control" />
-    <br />
-    <button class="btn btn-primary" type="submit">Опубликовать</button>
+<div style="@(showNewArticleCreateForm ? "display:block" : "display:none")">
+    <h3>Add New Article</h3>
 
-</EditForm>
+    <EditForm Model="creationArticleRequest" OnValidSubmit="SubmitForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <label>Тема статьи</label>
+        <InputSelect @bind-Value="creationArticleRequest.ArticleTheme" class="form-control">
+            <option value="1">Дизайн</option>
+            <option value="2">Веб-разработка</option>
+            <option value="3">Мобильная разработка</option>
+            <option value="4">Маркетинг</option>
+
+        </InputSelect>
+
+
+        <label>Название</label>
+        <InputText @bind-Value="creationArticleRequest.Name" class="form-control" />
+        <br />
+        <InputTextArea @bind-Value="creationArticleRequest.Text" class="form-control" />
+        <br />
+        <button class="btn btn-primary" type="submit">Опубликовать</button>
+
+    </EditForm>
+</div>
 
 @code {
     private CreationArticleRequest creationArticleRequest = new();
+    private bool showNewArticleCreateForm = false;
 
     private async Task SubmitForm()
     {
@@ -41,5 +60,9 @@
 
     }
 
-
+    private async Task OnClickTesting()
+    {
+        //await JsRuntime.InvokeVoidAsync("alert", "Testing Method from Component");
+        showNewArticleCreateForm = !showNewArticleCreateForm;
+    }
 }

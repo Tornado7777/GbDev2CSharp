@@ -28,7 +28,9 @@ namespace CloneHabr.Data
 
         public bool Online { get; set; }
 
-        public int Gender { get; set; }       
+        public int Gender { get; set; }
+
+        public int? Raiting { get; set; }
 
     }
 }

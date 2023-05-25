@@ -1,10 +1,12 @@
 ﻿@page "/login"
+@using CloneHabr.Dto.Requests;
 @inject HttpClient httpClient
 @inject SessionDto userSession
 @inject UserInfo userInfo
 @inject NavigationManager navigationManager
 @inject IJSRuntime JsRuntime
 @using CloneHabr.Dto.Requests;
+@using CloneHabr.Dto.Status;
 
 
 <PageTitle>Login</PageTitle>
@@ -61,8 +63,8 @@
                     authResponse.Session.SessionId,
                     authResponse.Session.User.Login,
                     authResponse.Session.SessionToken);
-                navigationManager.NavigateTo("/home");
                 httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {userInfo.Token}");
+                navigationManager.NavigateTo("/home");
             }
             else
             {

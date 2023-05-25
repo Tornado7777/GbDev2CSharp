@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CloneHabr.Data.Migrations
 {
     [DbContext(typeof(ClonehabrDbContext))]
-    [Migration("20230424162903_ArticleStatusInt")]
-    partial class ArticleStatusInt
+    [Migration("20230524152425_migration123")]
+    partial class migration123
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,6 +57,9 @@ namespace CloneHabr.Data.Migrations
                     b.Property<bool>("Online")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("Raiting")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("datetime2");
 
@@ -78,6 +81,9 @@ namespace CloneHabr.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ArticleTheme")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
 
@@ -85,6 +91,9 @@ namespace CloneHabr.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<int?>("Raiting")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -119,6 +128,9 @@ namespace CloneHabr.Data.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("Raiting")
+                        .HasColumnType("int");
+
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(100000)
@@ -135,6 +147,31 @@ namespace CloneHabr.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("CloneHabr.Data.Entity.Like", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("IdArticle")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("IdComment")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("IdUser")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("CloneHabr.Data.Entity.Violation", b =>

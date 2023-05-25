@@ -13,11 +13,14 @@ namespace CloneHabr.Data
         public string Name { get; set; }
         public int Status { get; set; }
 
+        public int ArticleTheme { get; set; }
+
         [StringLength(100000)]
         public string Text { get; set; }
 
         [Column(TypeName = "datetime2")]
         public DateTime CreationDate { get; set; }
+        public int? Raiting { get; set; }
 
         public ICollection<Comment> Comments { get; set; }
 
