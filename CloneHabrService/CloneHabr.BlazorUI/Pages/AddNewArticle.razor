@@ -5,7 +5,7 @@
 @using CloneHabr.Dto.Requests;
 
 <div class="nav-item px-3">
-    <NavLink class="nav-link" href="/cabinet" @onclick="OnClickTesting">
+    <NavLink class="nav-link" href="/cabinet" @onclick="OnClickShowHideNewArticleForm">
         <span class="oi oi-plus me-2"></span>Новая статья
     </NavLink>
 </div>
@@ -51,18 +51,19 @@
         if (response.IsSuccessStatusCode)
         {
             Console.WriteLine("Статья опубликована успешно");
+            await JsRuntime.InvokeVoidAsync("alert", "Статья опубликована успешно");
             navigationManager.NavigateTo("/cabinet");
         }
         else
         {
+            await JsRuntime.InvokeVoidAsync("alert", "Ошибка при публикации");
             Console.WriteLine("Ошибки при публикации");
         }
 
     }
 
-    private async Task OnClickTesting()
+    private void OnClickShowHideNewArticleForm()
     {
-        //await JsRuntime.InvokeVoidAsync("alert", "Testing Method from Component");
         showNewArticleCreateForm = !showNewArticleCreateForm;
     }
 }
