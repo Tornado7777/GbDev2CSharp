@@ -1,14 +1,27 @@
 ﻿@page "/Article/{articleId:int}"
 @using CloneHabr.Dto.Requests;
 @inject HttpClient httpClient
-<h3>@articleDto.Name</h3>
-@articleDto.Text
-<br />
-Автор: @articleDto.LoginUser, @articleDto.CreationDate
+
+<div style="@((mainText is not null) ? "display:block" : "display:none") ">
+    <h3>@articleDto.Name</h3>
+    @if(mainText is not null)
+    {
+        @foreach (var item in mainText)
+        {
+            @item
+            <br />
+        }
+    }
+    <hr />
+    Автор: @articleDto.LoginUser, @articleDto.CreationDate
+    <br />
+</div>
+
 @code {
     [Parameter]
     public int articleId { get; set; }
 
+    string[] mainText;
     ArticleDto articleDto = new();
 
     protected override async void OnInitialized()
@@ -17,14 +30,13 @@
         Console.WriteLine($"*** running Article.OnInitialized()\narticleId is {articleId}");
 
         var articleDtoResponse = await httpClient.GetFromJsonAsync<GetByIdArticleResponse>(uri);
-        while (articleDtoResponse.Status != Dto.Status.GetByIdArticleStatus.Success)
-        {
-            //TODO придумать как-то по другому
-        }
 
         articleDto = articleDtoResponse.articleDto;
-        StateHasChanged();
+        mainText = articleDto.Text.Split(
+            new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None
+        );
 
+        StateHasChanged();
     }
 
     protected override void OnParametersSet()
