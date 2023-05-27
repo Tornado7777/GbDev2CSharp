@@ -6,10 +6,11 @@
     <h3>@articleDto.Name</h3>
     @if(mainText is not null)
     {
-        @foreach (var item in mainText)
+        foreach (var item in mainText)
         {
-            @item
-            <br />
+            <p>
+                @item
+            </p>
         }
     }
     <hr />
