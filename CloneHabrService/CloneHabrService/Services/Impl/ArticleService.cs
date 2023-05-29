@@ -257,7 +257,7 @@ namespace CloneHabrService.Services.Impl
                 likeResponse.Status = LikeStatus.ArticleNotFound;
                 return likeResponse;
             }
-            var like = context.Likes.FirstOrDefault(u => u.Id == articleId && u.IdUser == user.UserId);
+            var like = context.Likes.FirstOrDefault(u => u.IdArticle == articleId && u.IdUser == user.UserId);
             if (like == null)
             {
                 like = new Like
