@@ -1,27 +1,43 @@
 ﻿@page "/Article/{articleId:int}"
 @using CloneHabr.Dto.Requests;
+@inject UserInfo userInfo
 @inject HttpClient httpClient
+@inject IJSRuntime JsRuntime
 
-<div style="@((mainText is not null) ? "display:block" : "display:none") ">
-    <h3>@articleDto.Name</h3>
-    @if(mainText is not null)
-    {
-        foreach (var item in mainText)
+<div style="@((mainText is not null) ? "display:block" : "display:none") "  >
+    <div class="col-12 col-xl-10 " >
+        <h3>@articleDto.Name</h3>
+        @if(mainText is not null)
         {
-            <p>
-                @item
-            </p>
+            foreach (var item in mainText)
+            {
+                <p>
+                    @item
+                </p>
+            }
         }
-    }
-    <hr />
-    Автор: @articleDto.LoginUser, @articleDto.CreationDate
-    <br />
+        <hr />
+
+        <div class="mx-3 my-4">
+            Автор: @articleDto.LoginUser, @articleDto.CreationDate
+            
+            
+
+                <button class="btn btn-outline-secondary ms-5" @onclick="OnClickLikeButton">
+
+                    <span class="oi oi-thumb-up "></span>
+                </button>
+            Понравилось: @likesCounter
+            
+        </div>
+        
+    </div>
 </div>
 
 @code {
     [Parameter]
     public int articleId { get; set; }
-
+    int likesCounter;
     string[] mainText;
     ArticleDto articleDto = new();
 
@@ -36,7 +52,8 @@
         mainText = articleDto.Text.Split(
             new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None
         );
-
+        
+        likesCounter = articleDto.Raiting;
         StateHasChanged();
     }
 
@@ -45,5 +62,37 @@
         Console.WriteLine($"*** running Article.OnParametersSet()\narticleId is {articleId}");
     }
 
+    protected async void OnClickLikeButton()
+    {
+        if (userInfo.IsLoggedIn)
+        {
+            string uri = $"api/Article/AddLikeArticleById?articleId={articleId}";
+
+            var addLikeResponse = await httpClient.GetFromJsonAsync<LikeResponse>(uri);
+            if (addLikeResponse.Status == Dto.@enum.LikeStatus.AddLike)
+            {
+                ++likesCounter;
+                StateHasChanged();
+                await JsRuntime.InvokeVoidAsync("alert", "Вы отметили статью");
+            }
+            else if(addLikeResponse.Status == Dto.@enum.LikeStatus.UserLikeExists)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Статья уже отмечена лайком");
+            }
+            else
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Возникла ошибка");
+            }
+            
+        }
+        else
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Авторизуйтесь для отметки");
+        }
+
+
+
+        Console.WriteLine($"*** running Article.OnClickLikeButton()");
+    }
 
 }
