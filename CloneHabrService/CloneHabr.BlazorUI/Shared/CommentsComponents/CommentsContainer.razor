@@ -1,0 +1,12 @@
+﻿@inject UserInfo userInfo
+
+<h3>CommentsContainer</h3>
+
+<div style="@(userInfo.IsLoggedIn ? "display:block" : "display:none")">
+
+    <AddNewComment />
+</div>
+<CommentsList></CommentsList>
+@code {
+
+}
