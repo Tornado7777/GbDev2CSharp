@@ -21,4 +21,8 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Shared\CommentsComponents\" />
+  </ItemGroup>
+
 </Project>
