@@ -11,6 +11,7 @@ namespace CloneHabr.Dto.Status
         Success = 0,
         NotFoundArticle = 1,
         ErrorRead = 2,
+        EmptyText = 3,
         NullToken = 5,
     }
 }
