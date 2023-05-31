@@ -110,7 +110,8 @@ namespace CloneHabrService.Services.Impl
                             Text = comment.Text,
                             Raiting = comment.Raiting ?? 0,
                             CreationDate = comment.CreationDate,
-                            OwnerUser = comment.User.Login
+                            //TODO user is null, need to fix
+                            OwnerUser = comment.User?.Login ?? "userIsNull"
                         });
                     }
                 }
