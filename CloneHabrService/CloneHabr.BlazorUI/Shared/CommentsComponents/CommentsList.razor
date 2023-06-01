@@ -1,14 +1,15 @@
-﻿
+﻿@inject UserInfo userInfo
+
+@if (!userInfo.IsLoggedIn)
+{
+    <span>Авторизуйтесь для комментирования</span>
+}
+
 @if (comments is not null)
 {
     foreach (var item in comments)
     {
-        {
-            <hr />
-            @item.Text<br />
-            <span>Автор:  @item.OwnerUser</span>
-            <span class="ms-5" >Дата:  @item.CreationDate</span>
-        } 
+        <Comment commentDto="item" />
     }
 }
 

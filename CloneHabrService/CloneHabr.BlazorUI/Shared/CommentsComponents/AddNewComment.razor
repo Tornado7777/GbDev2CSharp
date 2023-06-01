@@ -8,7 +8,7 @@
     <ValidationSummary />
 
     <label>Текст комментария</label>
-    <InputText @bind-Value="commentDto.Text" class="form-control" />
+    <InputTextArea @bind-Value="commentDto.Text" class="form-control" />
     <br />
     <button class="btn btn-primary" type="submit">Опубликовать</button>
 </EditForm>
@@ -18,30 +18,32 @@
     [Parameter]
     public int articleId { get; set; }
 
+    [Parameter]
+    public EventCallback<CommentDto> OnAddNewCommentSuccess { get; set; }
+
     CommentDto commentDto = new();
 
     private async Task SubmitForm()
     {
         commentDto.ArticleId = articleId;
         commentDto.OwnerUser = userInfo.LoginName;
+        commentDto.CreationDate = DateTime.Now;
 
         string uri = "api/Article/CreationComment";
 
         using var commentResponse = await httpClient.PostAsJsonAsync<CommentDto>(uri, commentDto);
-        
+
         Console.WriteLine("*** running AddNewComment.SubmitForm() ***");
 
         if (commentResponse.IsSuccessStatusCode)
         {
+            await OnAddNewCommentSuccess.InvokeAsync(commentDto);
             await jsRuntime.InvokeVoidAsync("alert", "Комментарий опубликован");
-
+            commentDto = new();
         }
         else
         {
             await jsRuntime.InvokeVoidAsync("alert", "Ошибка при публикации комментария");
         }
-
-
     }
-
 }

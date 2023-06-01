@@ -12,7 +12,7 @@
 
                 <div style="@(userInfo.IsLoggedIn ? "display:block" : "display:none")">
 
-                    <AddNewComment articleId="articleId" />
+                    <AddNewComment articleId="articleId" OnAddNewCommentSuccess="@AddNewComment" />
                 </div>
 
                 <CommentsList comments="comments" />
@@ -26,4 +26,10 @@
     public int articleId { get; set; }
     [Parameter]
     public List<CommentDto> comments { get; set; }
+
+    private void AddNewComment(CommentDto commentDto)
+    {
+        comments.Add(commentDto);
+    }
+
 }
