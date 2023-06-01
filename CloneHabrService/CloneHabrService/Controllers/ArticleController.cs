@@ -444,7 +444,7 @@ namespace CloneHabrService.Controllers
                     JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
                     var jwt = tokenHandler.ReadJwtToken(sessionToken);
                     //int userId = int.Parse(jwt.Claims.First(c => c.Type == "nameid").Value);
-                    string login = jwt.Claims.First(c => c.Type == "unique_name").Value;
+                    string login = jwt.Claims.First(c => c.Type == "unique_name").Value; //что в login? зачем в commentDto имя?
                     var commentResponse = _articleService.CreateCommnet(commentDto, login);
                     if (commentResponse == null)
                     {

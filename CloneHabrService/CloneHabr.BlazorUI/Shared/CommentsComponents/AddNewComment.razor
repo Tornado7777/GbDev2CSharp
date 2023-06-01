@@ -1,0 +1,47 @@
+﻿@inject HttpClient httpClient
+@inject UserInfo userInfo
+@inject IJSRuntime jsRuntime
+<h5>Добавление комментария</h5>
+
+<EditForm Model="commentDto" OnValidSubmit="SubmitForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label>Текст комментария</label>
+    <InputText @bind-Value="commentDto.Text" class="form-control" />
+    <br />
+    <button class="btn btn-primary" type="submit">Опубликовать</button>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int articleId { get; set; }
+
+    CommentDto commentDto = new();
+
+    private async Task SubmitForm()
+    {
+        commentDto.ArticleId = articleId;
+        commentDto.OwnerUser = userInfo.LoginName;
+
+        string uri = "api/Article/CreationComment";
+
+        using var commentResponse = await httpClient.PostAsJsonAsync<CommentDto>(uri, commentDto);
+        
+        Console.WriteLine("*** running AddNewComment.SubmitForm() ***");
+
+        if (commentResponse.IsSuccessStatusCode)
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "Комментарий опубликован");
+
+        }
+        else
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "Ошибка при публикации комментария");
+        }
+
+
+    }
+
+}

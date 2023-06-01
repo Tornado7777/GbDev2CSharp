@@ -3,8 +3,10 @@
 <br />
 Автор: @articleDto.LoginUser
 <br />
-Время публикации на сервере: @articleDto.CreationDate
-<NavLink class="nav-link" href="@articleId">
+Опубликовано на сервере: @articleDto.CreationDate
+<span class="oi oi-thumb-up ms-3" style="color:forestgreen " >@articleDto.Raiting</span>
+
+<NavLink class="nav-link col-3" href="@articleId">
     Читать дальше
 </NavLink>
 @code {

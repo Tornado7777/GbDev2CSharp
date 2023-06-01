@@ -20,18 +20,15 @@
 
         <div class="mx-3 my-4">
             Автор: @articleDto.LoginUser, @articleDto.CreationDate
-            
-            
 
-                <button class="btn btn-outline-secondary ms-5" @onclick="OnClickLikeButton">
-
-                    <span class="oi oi-thumb-up "></span>
-                </button>
-            Понравилось: @likesCounter
+            <button class="btn btn-outline-secondary ms-5" @onclick="OnClickLikeButton">
+                <span class="oi oi-thumb-up "> @likesCounter</span>
+            </button>
             
         </div>
         
     </div>
+    <CommentsContainer comments="comments" articleId="articleId" />
 </div>
 
 @code {
@@ -40,6 +37,7 @@
     int likesCounter;
     string[] mainText;
     ArticleDto articleDto = new();
+    List<CommentDto> comments;
 
     protected override async void OnInitialized()
     {
@@ -52,7 +50,8 @@
         mainText = articleDto.Text.Split(
             new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None
         );
-        
+        comments = articleDto.Comments;
+        Console.WriteLine($"*** комментариев к статье: {comments.Count}");
         likesCounter = articleDto.Raiting;
         StateHasChanged();
     }

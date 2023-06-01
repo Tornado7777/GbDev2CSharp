@@ -1,0 +1,19 @@
+﻿
+@if (comments is not null)
+{
+    foreach (var item in comments)
+    {
+        {
+            <hr />
+            @item.Text<br />
+            <span>Автор:  @item.OwnerUser</span>
+            <span class="ms-5" >Дата:  @item.CreationDate</span>
+        } 
+    }
+}
+
+@code {
+    [Parameter]
+    public List<CommentDto>? comments { get; set; }
+
+}

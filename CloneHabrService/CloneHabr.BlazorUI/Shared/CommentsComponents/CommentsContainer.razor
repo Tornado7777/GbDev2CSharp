@@ -1,0 +1,29 @@
+﻿@inject UserInfo userInfo
+
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+
+        <div class="card mb-5">
+            <div class="card-header">
+                <h5>Комментарии к статье</h5>
+            </div>
+            <div class="card-body">
+
+                <div style="@(userInfo.IsLoggedIn ? "display:block" : "display:none")">
+
+                    <AddNewComment articleId="articleId" />
+                </div>
+
+                <CommentsList comments="comments" />
+            </div>
+        </div>
+    </div>
+
+</div>
+@code {
+    [Parameter]
+    public int articleId { get; set; }
+    [Parameter]
+    public List<CommentDto> comments { get; set; }
+}
