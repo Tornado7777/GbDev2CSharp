@@ -1,12 +1,12 @@
 ﻿@page "/register"
+@using CloneHabr.Dto.Status;
 @using CloneHabr.Dto.Requests;
+@using System.ComponentModel.DataAnnotations;
 @inject HttpClient httpClient
 @inject SessionDto userSession
 @inject UserInfo userInfo
 @inject NavigationManager navigationManager
-@using CloneHabr.Dto.Requests;
-@using System.ComponentModel.DataAnnotations;
-@using CloneHabr.Dto.Status;
+
 
 <PageTitle>Register</PageTitle>
 

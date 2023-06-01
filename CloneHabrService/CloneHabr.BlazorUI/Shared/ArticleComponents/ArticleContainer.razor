@@ -16,11 +16,6 @@
         var response = await httpClient.GetFromJsonAsync<ArticlesLidResponse>(uri);
         articlesLidResponses = response.Articles;
 
-        while (response.Status != Dto.Status.ArtclesLidStatus.Success)
-        {
-            //костыли-костыли
-        }
-
         Console.WriteLine(response.Status);
         Console.WriteLine(response.Articles.Count);
 

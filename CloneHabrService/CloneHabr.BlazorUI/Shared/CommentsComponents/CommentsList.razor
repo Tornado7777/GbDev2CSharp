@@ -1,0 +1,20 @@
+﻿@inject UserInfo userInfo
+
+@if (!userInfo.IsLoggedIn)
+{
+    <span>Авторизуйтесь для комментирования</span>
+}
+
+@if (comments is not null)
+{
+    foreach (var item in comments)
+    {
+        <Comment commentDto="item" />
+    }
+}
+
+@code {
+    [Parameter]
+    public List<CommentDto>? comments { get; set; }
+
+}

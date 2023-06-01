@@ -3,7 +3,7 @@
 @using CloneHabr.Dto.Requests
 
 <div class="nav-item px-3">
-    <NavLink class="nav-link" href="/cabinet" @onclick="OnClickShowEditUserForm">
+    <NavLink class="nav-link col-4" href="/cabinet" @onclick="OnClickShowEditUserForm">
         <span class="oi oi-briefcase me-2"></span>Информация о пользователе
     </NavLink>
 </div>
@@ -24,7 +24,7 @@
         <label>Фамилия</label>
         <InputText @bind-Value="accountResponse.Account.LastName" class="form-control" />
         <br />
-        <label>Электропочта</label>
+        <label>E-mail</label>
         <InputText @bind-Value="accountResponse.Account.EMail" class="form-control" />
         <br />
         <label>Дата рождения</label>

@@ -110,7 +110,8 @@ namespace CloneHabrService.Services.Impl
                             Text = comment.Text,
                             Raiting = comment.Raiting ?? 0,
                             CreationDate = comment.CreationDate,
-                            OwnerUser = comment.User.Login
+                            //TODO user is null, need to fix
+                            OwnerUser = comment.User?.Login ?? "userIsNull"
                         });
                     }
                 }
@@ -196,6 +197,71 @@ namespace CloneHabrService.Services.Impl
             return articlesDto;
         }
 
+        public List<ArticleDto> GetArticlesByText(string text, bool raitingSort)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var articles = new List<Article>();
+            if (raitingSort)
+            {
+                articles = (from article in context.Articles
+                            where article.Text.Contains(text)
+                            orderby article.Raiting descending
+                            select article).ToList();
+            }
+            else
+            {
+                articles = (from article in context.Articles
+                            where article.Text.Contains(text) 
+                            orderby article.CreationDate descending
+                            select article).ToList();
+            }
+
+            if (!articles.Any())
+            {
+                return null;
+            }
+            var articlesDto = new List<ArticleDto>();
+            foreach (var article in articles)
+            {
+                var comments = context.Comments.Where(art => art.ArticleId == article.Id).ToList();
+                var commnetDto = new List<CommentDto>();
+                if (comments.Any())
+                {
+                    foreach (var comment in comments)
+                    {
+                        commnetDto.Add(new CommentDto
+                        {
+                            Id = comment.Id,
+                            Text = comment.Text,
+                            Raiting = comment.Raiting ?? 0,
+                            CreationDate = comment.CreationDate,
+                            OwnerUser = comment.User.Login
+                        });
+                    }
+                }
+                //здесь также можно сделать проверку статуса статьи
+                if (article == null)
+                {
+                    return null;
+                }
+                var loginUser = context.Users.FirstOrDefault(x => x.UserId == article.UserId).Login;
+                articlesDto.Add(new ArticleDto
+                {
+                    Id = article.Id,
+                    Name = article.Name,
+                    Text = article.Text,
+                    ArticleTheme = article.ArticleTheme,
+                    Raiting = article.Raiting ?? 0,
+                    Status = article.Status,
+                    LoginUser = loginUser,
+                    CreationDate = article.CreationDate,
+                    Comments = commnetDto
+                });
+            }
+            return articlesDto;
+        }
+
         public ArticleDto GetById(int id)
         {
             using IServiceScope scope = _serviceScopeFactory.CreateScope();
@@ -257,7 +323,7 @@ namespace CloneHabrService.Services.Impl
                 likeResponse.Status = LikeStatus.ArticleNotFound;
                 return likeResponse;
             }
-            var like = context.Likes.FirstOrDefault(u => u.Id == articleId && u.IdUser == user.UserId);
+            var like = context.Likes.FirstOrDefault(u => u.IdArticle == articleId && u.IdUser == user.UserId);
             if (like == null)
             {
                 like = new Like
@@ -366,5 +432,7 @@ namespace CloneHabrService.Services.Impl
 
             return commentResponse;
         }
+
+        
     }
 }

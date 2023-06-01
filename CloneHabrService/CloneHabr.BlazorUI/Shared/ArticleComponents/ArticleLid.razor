@@ -1,7 +1,12 @@
 ﻿<h5>@articleDto.Name</h5>
-Main text: @articleDto.Text
-Published: @articleDto.CreationDate
-<NavLink class="nav-link" href="@articleId">
+@articleDto.Text
+<br />
+Автор: @articleDto.LoginUser
+<br />
+Опубликовано на сервере: @articleDto.CreationDate
+<span class="oi oi-thumb-up ms-3" style="color:forestgreen " >@articleDto.Raiting</span>
+
+<NavLink class="nav-link col-3" href="@articleId">
     Читать дальше
 </NavLink>
 @code {
