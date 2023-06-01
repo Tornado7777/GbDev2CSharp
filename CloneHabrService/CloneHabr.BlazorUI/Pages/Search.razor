@@ -1,9 +1,47 @@
 ﻿@page "/Search"
-<h3>Search</h3>
-<div>
-    
+@using System.ComponentModel.DataAnnotations;
+@using CloneHabr.Dto.Requests;
+@inject HttpClient httpClient
 
+<h3>Поиск</h3>
+<div>
+    <EditForm Model="searchQuery" OnSubmit="OnSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <label>Ищем: </label>
+        <InputText @bind-Value="searchQuery.SearchString" class="form-control" />
+
+        <InputSelect @bind-Value="searchQuery.ResultArrangeByLikes" class="form-control">
+            <option value="false">false</option>
+            <option value="true">true</option>
+        </InputSelect>
+
+        <button class="btn btn-primary" type="submit">Найти</button>
+    </EditForm>
+    <hr />
+    <ArticleLidsList articlesLidResponses="@articlesLidResponse" />
 </div>
+
 @code {
-    string uri = "api/Article/GetArticlesLidByText";
+    SearchQuery searchQuery = new();
+    List<ArticleDto> articlesLidResponse = new();
+
+    private async void OnSubmit()
+    {
+        //             api/Article/GetArticlesLidByText?text=111&raitingSort=false'
+        string uri = $"api/Article/GetArticlesLidByText?text={searchQuery.SearchString}&raitingSort={searchQuery.ResultArrangeByLikes}";
+        var response = await httpClient.GetFromJsonAsync<ArticlesLidResponse>(uri);
+        articlesLidResponse = response.Articles;
+        StateHasChanged();
+        Console.WriteLine($"*** Search.OnSubmit() string = {searchQuery.SearchString}, arrange = {searchQuery.ResultArrangeByLikes}\nНайдено записей: {articlesLidResponse.Count}");
+    }
+
+    class SearchQuery
+    {
+        [Required]
+        public string SearchString { get; set; } = string.Empty;
+        public bool ResultArrangeByLikes { get; set; }
+    }
+
 }
