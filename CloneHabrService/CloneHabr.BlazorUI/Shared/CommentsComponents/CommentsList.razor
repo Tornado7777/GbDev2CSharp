@@ -2,7 +2,12 @@
 
 @if (!userInfo.IsLoggedIn)
 {
-    <span>Авторизуйтесь для комментирования</span>
+    <div class="nav-item">
+        <NavLink class="nav-link" href="login">
+            <span>Авторизуйтесь для комментирования</span>
+
+        </NavLink>
+    </div>
 }
 
 @if (comments is not null)
