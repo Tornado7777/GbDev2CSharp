@@ -254,7 +254,7 @@ namespace CloneHabrService.Controllers
         [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status200OK)]
         public IActionResult GetArticlesLidByTheme([FromQuery] ArticleTheme articleTheme)
         {
-
+            //кол-во символов отображаемых в лиде
             int countCharInLead = 50;
             var articlesLidResponse = new ArticlesLidResponse();
 
@@ -285,6 +285,82 @@ namespace CloneHabrService.Controllers
                     Status = ArtclesLidStatus.ErrorRead
                 });
             }
+
+            return Ok(articlesLidResponse);
+        }
+
+        /// <summary>
+        /// Метод возвращает лиды статьи начиная с текста который в поиске по заданное кол-во (сейчас 100).
+        /// Статьи сортируются по дате в обратном порядке по умолчанию или по рейтингу(raitingSort = true).
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="raitingSort"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("GetArticlesLidByText")]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status200OK)]
+        public IActionResult GetArticlesLidByText([FromQuery] string text, [FromQuery] bool raitingSort = false)
+        {
+            //кол-во символов отображаемых в лиде
+            int countCharInLead = 100;
+            var articlesLidResponse = new ArticlesLidResponse();
+            //проверка на наличие текста в запросе
+            if (!string.IsNullOrEmpty(text))
+            {
+                try
+                {
+                    articlesLidResponse.Articles = _articleService.GetArticlesByText(text, raitingSort);
+                    if (articlesLidResponse.Articles != null &&
+                        articlesLidResponse.Articles.Count > 0)
+                    {
+                        articlesLidResponse.Status = ArtclesLidStatus.Success;
+                        foreach (var article in articlesLidResponse.Articles)
+                        {
+                            var index = article.Text.IndexOf(text);
+                            if (article.Text.Length > index + countCharInLead)
+                            {
+                                if(index == 0)
+                                {
+                                    article.Text = article.Text.Substring(index, index + countCharInLead) + " ...";
+                                }
+                                else
+                                {
+                                    article.Text = "... " + article.Text.Substring(index, index + countCharInLead) + " ...";
+                                }
+                            }
+                            else
+                            {
+                                if (index == 0)
+                                {
+                                    article.Text = article.Text.Substring(index);
+                                }
+                                else
+                                {
+                                    article.Text = "... " + article.Text.Substring(index);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        articlesLidResponse.Status = ArtclesLidStatus.NotFoundArticle;
+                    }
+                }
+                catch
+                {
+                    return BadRequest(new ArticlesLidResponse
+                    {
+
+                        Status = ArtclesLidStatus.ErrorRead
+                    });
+                }
+            }
+            else
+            {
+                articlesLidResponse.Status = ArtclesLidStatus.EmptyText;
+            }       
 
             return Ok(articlesLidResponse);
         }
