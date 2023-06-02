@@ -304,7 +304,7 @@ namespace CloneHabrService.Controllers
         public IActionResult GetArticlesLidByText([FromQuery] string text, [FromQuery] bool raitingSort = false)
         {
             //кол-во символов отображаемых в лиде
-            int countCharInLead = 100;
+            int countCharInLead = 50;
             var articlesLidResponse = new ArticlesLidResponse();
             //проверка на наличие текста в запросе
             if (!string.IsNullOrEmpty(text))
@@ -323,11 +323,11 @@ namespace CloneHabrService.Controllers
                             {
                                 if(index == 0)
                                 {
-                                    article.Text = article.Text.Substring(index, index + countCharInLead) + " ...";
+                                    article.Text = article.Text.Substring(index, countCharInLead) + " ...";
                                 }
                                 else
                                 {
-                                    article.Text = "... " + article.Text.Substring(index, index + countCharInLead) + " ...";
+                                    article.Text = "... " + article.Text.Substring(index, countCharInLead) + " ...";
                                 }
                             }
                             else
