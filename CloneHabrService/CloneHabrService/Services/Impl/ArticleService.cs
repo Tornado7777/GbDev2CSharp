@@ -223,7 +223,7 @@ namespace CloneHabrService.Services.Impl
             var articlesDto = new List<ArticleDto>();
             foreach (var article in articles)
             {
-                var comments = context.Comments.Where(art => art.ArticleId == article.Id).ToList();
+                var comments = context.Comments.Where(art => art.ArticleId == article.Id).Include(x => x.User).ToList();
                 var commnetDto = new List<CommentDto>();
                 if (comments.Any())
                 {
