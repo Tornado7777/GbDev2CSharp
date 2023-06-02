@@ -2,25 +2,39 @@
 @using System.ComponentModel.DataAnnotations;
 @using CloneHabr.Dto.Requests;
 @inject HttpClient httpClient
+@inject IJSRuntime JsRuntime
 
-<h3>Поиск</h3>
-<div>
-    <EditForm Model="searchQuery" OnSubmit="OnSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+<div class="row justify-content-center">
+    <h1 align="center">Поиск</h1>
 
-        <label>Ищем: </label>
-        <InputText @bind-Value="searchQuery.SearchString" class="form-control" />
+    <div >
+        <EditForm Model="searchQuery" OnValidSubmit="OnSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-        <InputSelect @bind-Value="searchQuery.ResultArrangeByLikes" class="form-control">
-            <option value="false">false</option>
-            <option value="true">true</option>
-        </InputSelect>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Ищем:</span>
+                <div class="col-6" >
 
-        <button class="btn btn-primary" type="submit">Найти</button>
-    </EditForm>
-    <hr />
-    <ArticleLidsList articlesLidResponses="@articlesLidResponse" />
+                    <InputText @bind-Value="searchQuery.SearchString" class="form-control" />
+                </div>
+
+                <span class="input-group-text ms-1">сортировка по</span>
+                <div class="col-2">
+                    <InputSelect @bind-Value="searchQuery.ResultArrangeByLikes" class="form-control">
+                        <option value="false">времени</option>
+                        <option value="true">лайкам</option>
+                    </InputSelect>
+                </div>
+            
+                <button class="btn btn-primary mx-1" type="submit">Найти</button>
+            </div>
+
+        </EditForm>
+        Количество найденных статей: @articlesLidResponse.Count
+        <hr />
+        <ArticleLidsList articlesLidResponses="@articlesLidResponse" />
+    </div>
 </div>
 
 @code {
@@ -29,12 +43,26 @@
 
     private async void OnSubmit()
     {
-        //             api/Article/GetArticlesLidByText?text=111&raitingSort=false'
         string uri = $"api/Article/GetArticlesLidByText?text={searchQuery.SearchString}&raitingSort={searchQuery.ResultArrangeByLikes}";
-        var response = await httpClient.GetFromJsonAsync<ArticlesLidResponse>(uri);
-        articlesLidResponse = response.Articles;
-        StateHasChanged();
-        Console.WriteLine($"*** Search.OnSubmit() string = {searchQuery.SearchString}, arrange = {searchQuery.ResultArrangeByLikes}\nНайдено записей: {articlesLidResponse.Count}");
+        Console.WriteLine($"*** Search.OnSubmit() string = {searchQuery.SearchString}, arrange = {searchQuery.ResultArrangeByLikes}");
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<ArticlesLidResponse>(uri);
+            if (response.Articles is not null)
+            {
+                articlesLidResponse = response.Articles;
+                StateHasChanged();
+            }
+            else
+            {
+                articlesLidResponse = new();
+            }
+        }
+        catch (Exception)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Ой, при выполнении запроса возникла ошибка на сервере,\nпопоробуйте повторить поиск позднее");
+        }
+        Console.WriteLine($"*** Найдено записей: {articlesLidResponse.Count}");
     }
 
     class SearchQuery
