@@ -54,13 +54,9 @@
 
             if (regResponse.Status == RegistrationStatus.Success)
             {
-                userInfo.LogIn(
-                    regResponse.Session.User.UserId,
-                    regResponse.Session.SessionId,
-                    regResponse.Session.User.Login,
-                    regResponse.Session.SessionToken);
+                userInfo.LogIn(regResponse);
 
-                #region Login user if success
+                #region Login user if registration is success
                 LogInUser(registrationRequest.Login, registrationRequest.Password);
                 #endregion
 

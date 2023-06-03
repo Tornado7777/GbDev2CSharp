@@ -1,14 +1,17 @@
 ﻿@page "/cabinet"
 @inject IJSRuntime JsRuntime
 
-<h3>Cabinet</h3>
 
-<div>
-    <AddNewArticle></AddNewArticle>
-</div>
-<br />
-<div>
-    <EditAccountComponent></EditAccountComponent>
+<div class="col-lg-8">
+    <h2 align="center">Личный кабинет пользователя</h2>
+
+    <div class="my-3">
+        <AddNewArticle></AddNewArticle>
+    </div>
+
+    <div class="my-3">
+        <EditAccountComponent></EditAccountComponent>
+    </div>
 </div>
 
 @code {

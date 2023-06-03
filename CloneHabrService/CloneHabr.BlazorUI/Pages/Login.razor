@@ -55,11 +55,7 @@
 
             if (authResponse.Status == AuthenticationStatus.Success)
             {
-                userInfo.LogIn(
-                    authResponse.Session.User.UserId,
-                    authResponse.Session.SessionId,
-                    authResponse.Session.User.Login,
-                    authResponse.Session.SessionToken);
+                userInfo.LogIn(authResponse);
                 httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {userInfo.Token}");
                 navigationManager.NavigateTo("/home");
             }
