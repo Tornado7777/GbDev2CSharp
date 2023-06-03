@@ -31,17 +31,19 @@ public class UserInfo
 
     public bool IsLoggedIn { get; set; }
     
-    public void LogIn(int userId, int sessionId, string loginName, string token)
+    public void LogIn(RegistrationResponse response)
     {
-        UserId = userId;
-        SessionId = sessionId;
-        LoginName = loginName;
-        Token = token;
+        UserId = response.Session.User.UserId;
+        LoginName = response.Session.User.Login;
+        Token = response.Session.SessionToken;
         IsLoggedIn = true;
     }
 
-    public void LogIn()
+    public void LogIn(AuthenticationResponse response)
     {
+        UserId = response.Session.User.UserId;
+        LoginName = response.Session.User.Login;
+        Token = response.Session.SessionToken;
         IsLoggedIn = true;
     }
 
