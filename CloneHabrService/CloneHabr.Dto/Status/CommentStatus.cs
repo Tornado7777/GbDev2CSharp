@@ -18,5 +18,6 @@ namespace CloneHabr.Dto.Status
         DontSaveCommentDB = 7,
         DontCreateComment = 8,
         ExceptionComment = 9,
+        ErrorSendModerator = 10
     }
 }
