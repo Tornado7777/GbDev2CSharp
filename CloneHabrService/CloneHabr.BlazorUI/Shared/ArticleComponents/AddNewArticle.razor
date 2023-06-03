@@ -52,6 +52,8 @@
         {
             Console.WriteLine("Статья опубликована успешно");
             await JsRuntime.InvokeVoidAsync("alert", "Статья опубликована успешно");
+            creationArticleRequest = new();
+            showNewArticleCreateForm = !showNewArticleCreateForm;
             navigationManager.NavigateTo("/cabinet");
         }
         else
