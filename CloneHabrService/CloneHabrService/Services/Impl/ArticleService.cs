@@ -419,6 +419,39 @@ namespace CloneHabrService.Services.Impl
                 }
             //добавляю к рейтингу пользователя создавшего статью
 
+            //если текст содержит @moderator создается уведомления для модераторов и админов
+            if (commentDto.Text.Contains("@moderator"))
+            {
+                try
+                {
+                    var notification = new Notification
+                    {
+                        Text = commentDto.Text,
+                        ArticleId = commentDto.ArticleId,
+                        CreationDate = DateTime.Now,
+                        FromUserId = user.UserId,
+                        CommentId = comment.Id,
+                        ForUserRole = (int?)Roles.Moderator
+                    };
+                    context.Notifications.Add(notification);
+                    if (context.SaveChanges() < 0)
+                    {
+                        throw new Exception();
+                    }
+                }
+                catch
+                {
+                    commentResponse.Status = CommentStatus.ErrorSendModerator;
+                    commentResponse.Comment = new CommentDto
+                    {
+                        CreationDate = comment.CreationDate,
+                        ArticleId = commentDto.ArticleId,
+                        Text = commentDto.Text,
+                        OwnerUser = login
+                    };
+                    return commentResponse;
+                }
+            }
 
             commentResponse.Status = CommentStatus.AddComment;
             commentResponse.Comment = new CommentDto
