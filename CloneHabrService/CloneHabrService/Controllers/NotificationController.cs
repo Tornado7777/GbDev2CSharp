@@ -8,6 +8,7 @@ using CloneHabr.Dto.Status;
 using CloneHabrService.Services.Impl;
 using Microsoft.Net.Http.Headers;
 using System.Net.Http.Headers;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace CloneHabrService.Controllers
 {
@@ -53,7 +54,43 @@ namespace CloneHabrService.Controllers
                 }
                 catch
                 {
-                    notifiactionsResponse.Status = NotificationStatus.ExceptionNotification;
+                    notifiactionsResponse.Status = NotificationStatus.ServiceException;
+                    return BadRequest(notifiactionsResponse);
+                }
+            }
+            return Ok(notifiactionsResponse);
+        }
+
+        [HttpGet]
+        [Route("GetNotifications")]
+        [ProducesResponseType(typeof(NotifiactionsResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(NotifiactionsResponse), StatusCodes.Status200OK)]
+        public IActionResult GetNotifications()
+        {
+            var authorizationHeader = Request.Headers[HeaderNames.Authorization];
+            var notifiactionsResponse = new NotifiactionsResponse();
+            if (AuthenticationHeaderValue.TryParse(authorizationHeader, out var headerValue))
+            {
+                var sessionToken = headerValue.Parameter; // Token
+                //проверка на null или пустой
+                if (string.IsNullOrEmpty(sessionToken))
+                {
+                    notifiactionsResponse.Status = NotificationStatus.NullToken;
+                }
+
+                try
+                {
+                    JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+                    var jwt = tokenHandler.ReadJwtToken(sessionToken);
+                    string login = jwt.Claims.First(c => c.Type == "unique_name").Value;
+                    notifiactionsResponse = _notificationService.ReadListByLogin(login);
+                    if (notifiactionsResponse == null)
+                        return NotFound(new NotifiactionsResponse { Status = NotificationStatus.ServiceReturnNull });
+                    return Ok(notifiactionsResponse);
+                }
+                catch
+                {
+                    notifiactionsResponse.Status = NotificationStatus.ServiceException;
                     return BadRequest(notifiactionsResponse);
                 }
             }

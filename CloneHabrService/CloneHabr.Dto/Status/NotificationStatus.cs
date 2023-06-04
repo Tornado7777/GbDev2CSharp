@@ -11,7 +11,8 @@
         NotificationNotFound = 6,
         DontSaveNotificationDB = 7,
         DontCreateNotification = 8,
-        ExceptionNotification = 9,
+        ServiceException = 9,
         ReadNotifications = 10,
+        ServiceReturnNull = 11,
     }
 }
