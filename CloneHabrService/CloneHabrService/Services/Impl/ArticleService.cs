@@ -32,6 +32,10 @@ namespace CloneHabrService.Services.Impl
             {
                 return new CreationArticleResponse { Status = CreationArticleStatus.UserNotFound };
             }
+            if(user.EndDateLocked < DateTime.Now)
+            {
+                return new CreationArticleResponse { Status = CreationArticleStatus.UserBaned };
+            }
             var article = new Article { 
                 Name = creationArticleRequest.Name,
                 Text = creationArticleRequest.Text,
@@ -318,6 +322,11 @@ namespace CloneHabrService.Services.Impl
                 likeResponse.Status = LikeStatus.UserNotFound;
                 return likeResponse;
             }
+            if (user.EndDateLocked < DateTime.Now)
+            {
+                likeResponse.Status = LikeStatus.UserBaned;
+                return likeResponse;
+            }
             if (article == null)
             {
                 likeResponse.Status = LikeStatus.ArticleNotFound;
@@ -389,6 +398,11 @@ namespace CloneHabrService.Services.Impl
             if (user == null)
             {
                 commentResponse.Status = CommentStatus.UserNotFound;
+                return commentResponse;
+            }
+            if (user.EndDateLocked < DateTime.Now)
+            {
+                commentResponse.Status = CommentStatus.UserBaned;
                 return commentResponse;
             }
             if (article == null)

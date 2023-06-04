@@ -18,5 +18,6 @@ namespace CloneHabr.Dto.@enum
         DontSaveLikeDB = 7,
         NotFoundUserAccountIdOrAccount = 8,
         NotSaveRaitingAccountOrArticle = 9,
+        UserBaned = 12,
     }
 }

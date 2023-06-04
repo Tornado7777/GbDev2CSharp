@@ -14,5 +14,6 @@
         ServiceException = 9,
         ReadNotifications = 10,
         ServiceReturnNull = 11,
+        UserBaned = 12,
     }
 }
