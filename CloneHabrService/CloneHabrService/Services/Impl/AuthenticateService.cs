@@ -312,6 +312,7 @@ namespace CloneHabrService.Services.Impl
                     UserId = user.UserId,
                     Login = user.Login,
                     Locked = user.Locked,
+                    Role = (Roles)user.RoleId,
                     EndDateLocked = user.EndDateLocked
                 }
             };

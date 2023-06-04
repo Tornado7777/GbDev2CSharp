@@ -16,5 +16,6 @@ namespace CloneHabr.Dto.Status
         NullToken = 5,
         ErrorCreateNotification = 6,
         ServiceException = 9,
+        ErrorSaveDb = 10,
     }
 }

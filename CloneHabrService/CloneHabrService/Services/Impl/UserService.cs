@@ -38,16 +38,19 @@ namespace CloneHabrService.Services.Impl
             if (user == null && fromUser == null)
             {
                 userResponse.Status = UserStatus.UserNotFound;
+                return userResponse;
             }
             var fromUserRole = GetUserRole(context, fromLogin);
             if (fromUserRole == Roles.UnregistredUser)
             {
                 userResponse.Status = UserStatus.UnregistredUser;
+                return userResponse;
             }
             //если роль назначаемая меньше роли запрашивающего ошибка доступа
-            if ((int)fromUserRole < user.RoleId)
+            if ((int)fromUserRole <= user.RoleId)
             {
                 userResponse.Status = UserStatus.UserAccessDenied;
+                return userResponse;
             }
             user.EndDateLocked = DateTime.Now.AddDays(banedDay);
             context.Users.Update(user);
@@ -55,11 +58,11 @@ namespace CloneHabrService.Services.Impl
             {
                 userResponse.Status = UserStatus.Success;
             }
-
-            if (userResponse.Status != UserStatus.Success)
+            else
             {
+                userResponse.Status = UserStatus.ErrorSaveDb;
                 return userResponse;
-            }
+            }            
 
             #endregion
 
@@ -110,16 +113,19 @@ namespace CloneHabrService.Services.Impl
             if (user == null && fromUser == null)
             {
                 userResponse.Status = UserStatus.UserNotFound;
+                return userResponse;
             }
             var fromUserRole = GetUserRole(context, fromLogin);
             if (fromUserRole == Roles.UnregistredUser)
             {
                 userResponse.Status = UserStatus.UnregistredUser;
+                return userResponse;
             }
             //если роль назначаемая меньше роли запрашивающего ошибка доступа
-            if (fromUserRole < role)
+            if ((int)fromUserRole <= (int)role)
             {
                 userResponse.Status = UserStatus.UserAccessDenied;
+                return userResponse;
             }
             user.RoleId = (int)role;
             context.Users.Update(user);
@@ -127,12 +133,11 @@ namespace CloneHabrService.Services.Impl
             {
                 userResponse.Status = UserStatus.Success;
             }
-
-            if (userResponse.Status != UserStatus.Success)
+            else
             {
+                userResponse.Status = UserStatus.ErrorSaveDb;
                 return userResponse;
             }
-
             #endregion
 
             #region Create Notification
@@ -183,22 +188,21 @@ namespace CloneHabrService.Services.Impl
             if (user == null)
             {
                 userResponse.Status = UserStatus.UserNotFound;
+                return userResponse;
             }
             var fromUserRole = GetUserRole(context, fromLogin);
             if (fromUserRole == Roles.UnregistredUser)
             {
                 userResponse.Status = UserStatus.UnregistredUser;
+                return userResponse;
             }
             //если роль запрашивающего меньше роли запроса ошибка доступа
             if ((int)fromUserRole < user.RoleId)
             {
                 userResponse.Status = UserStatus.UserAccessDenied;
-            }
-            userResponse.Status = UserStatus.Success;
-            if (userResponse.Status != UserStatus.Success)
-            {
                 return userResponse;
             }
+            userResponse.Status = UserStatus.Success;            
 
             #endregion
 
@@ -224,23 +228,38 @@ namespace CloneHabrService.Services.Impl
             {
                 usersResponse.Status = UserStatus.UnregistredUser;
             }
-            if (users.Any())
+            if (!users.Any())
             {
                 usersResponse.Status = UserStatus.UserNotFound;
             }
             else
             {
                 usersResponse.Status = UserStatus.Success;
+                usersResponse.ListUserDto = new List<UserDto>();
                 foreach (var user in users)
                 {
-                    usersResponse.ListUserDto.Add(new UserDto
+                    if(user.EndDateLocked == null) 
                     {
-                        UserId = user.UserId,
-                        Login = user.Login,
-                        Locked = user.Locked,
-                        EndDateLocked = user.EndDateLocked,
-                        Role = (Roles)user.RoleId
-                    });
+                        usersResponse.ListUserDto.Add(new UserDto
+                        {
+                            UserId = user.UserId,
+                            Login = user.Login,
+                            Locked = user.Locked,
+                            Role = (Roles)user.RoleId
+                        });
+                    } 
+                    else
+                    {
+                        usersResponse.ListUserDto.Add(new UserDto
+                        {
+                            UserId = user.UserId,
+                            Login = user.Login,
+                            Locked = user.Locked,
+                            EndDateLocked = user.EndDateLocked,
+                            Role = (Roles)user.RoleId
+                        });
+                    }
+                    
                 }
             }
             return usersResponse;
