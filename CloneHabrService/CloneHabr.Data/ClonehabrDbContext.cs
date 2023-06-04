@@ -12,6 +12,7 @@ namespace CloneHabr.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Like> Likes { get; set; }
         public DbSet<Violation> Violations { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         public ClonehabrDbContext(DbContextOptions options) : base(options)
         {
 

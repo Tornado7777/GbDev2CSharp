@@ -70,6 +70,7 @@ namespace CloneHabrService.Services.Impl
         {
             using IServiceScope scope = _serviceScopeFactory.CreateScope();
             ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var authenticationResponse = new AuthenticationResponse();
 
             User user =
                !string.IsNullOrWhiteSpace(authenticationRequest.Login) ?
@@ -77,19 +78,20 @@ namespace CloneHabrService.Services.Impl
 
             if (user == null)
             {
-                return new AuthenticationResponse
-                {
-                    Status = AuthenticationStatus.UserNotFound
-                };
+                authenticationResponse.Status = AuthenticationStatus.UserNotFound;
+                return authenticationResponse;
             }
 
             if (!PasswordUtils.VerifyPassword(authenticationRequest.Password, user.PasswordSalt, user.PasswordHash))
             {
-                return new AuthenticationResponse
-                {
-                    Status = AuthenticationStatus.InvalidPassword
-                };
+                authenticationResponse.Status = AuthenticationStatus.InvalidPassword;
+                return authenticationResponse;
             }
+            if(user.EndDateLocked > DateTime.Now)
+            {
+                authenticationResponse.Status = AuthenticationStatus.UserBaned;
+            }
+            
 
             UserSession session = new UserSession
             {
@@ -158,6 +160,7 @@ namespace CloneHabrService.Services.Impl
                 PasswordSalt = saltAndHash.Item1,
                 PasswordHash = saltAndHash.Item2,
                 Locked = false,
+                RoleId = 1,
                 Account = account
             };
             context.Users.Add(user);
@@ -201,49 +204,6 @@ namespace CloneHabrService.Services.Impl
                     Status = RegistrationStatus.ErrorCreateUser
                 };
             }
-        }
-
-        private SessionDto GetSessionDto(User user, UserSession userSession)
-        {
-            return new SessionDto
-            {
-                SessionId = userSession.SessionId,
-                SessionToken = userSession.SessionToken,
-                User = new UserDto
-                {
-                    UserId = user.UserId,
-                    Login = user.Login,
-                    Locked = user.Locked,
-                    EndDateLocked = user.EndDateLocked
-                }
-            };
-        }
-
-
-        private string CreateSessionToken(User user)
-        {
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            byte[] key = Encoding.ASCII.GetBytes(SecretKey);
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(
-                    new Claim[]{
-                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                        new Claim(ClaimTypes.Name, user.Login),  
-                        new Claim(ClaimTypes.NameIdentifier, user.RoleId.ToString())
-                    }),
-                Expires = DateTime.UtcNow.AddMinutes(45),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
-
-        private User FindUserByLogin(ClonehabrDbContext context, string login)
-        {
-            return context
-                .Users
-                .FirstOrDefault(user => user.Login == login);
         }
 
         public AccountResponse ChangeAccount(AccountDto accountDto)
@@ -336,5 +296,54 @@ namespace CloneHabrService.Services.Impl
             };
             return accountResponse;
         }
+
+       
+
+        #region Secondary functions
+
+        private SessionDto GetSessionDto(User user, UserSession userSession)
+        {
+            return new SessionDto
+            {
+                SessionId = userSession.SessionId,
+                SessionToken = userSession.SessionToken,
+                User = new UserDto
+                {
+                    UserId = user.UserId,
+                    Login = user.Login,
+                    Locked = user.Locked,
+                    Role = (Roles)user.RoleId,
+                    EndDateLocked = user.EndDateLocked
+                }
+            };
+        }
+
+        private string CreateSessionToken(User user)
+        {
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            byte[] key = Encoding.ASCII.GetBytes(SecretKey);
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(
+                    new Claim[]{
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                        new Claim(ClaimTypes.Name, user.Login),
+                        new Claim(ClaimTypes.NameIdentifier, user.RoleId.ToString())
+                    }),
+                Expires = DateTime.UtcNow.AddMinutes(45),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
+        private User FindUserByLogin(ClonehabrDbContext context, string login)
+        {
+            return context
+                .Users
+                .FirstOrDefault(user => user.Login == login);
+        }
+
+        #endregion
     }
 }
