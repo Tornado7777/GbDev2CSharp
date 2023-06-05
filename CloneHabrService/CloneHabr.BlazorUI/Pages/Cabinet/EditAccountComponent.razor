@@ -1,0 +1,95 @@
+﻿@inject HttpClient httpClient
+@inject IJSRuntime JsRuntime
+@using CloneHabr.Dto.Requests
+
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="/cabinet" @onclick="OnClickShowEditUserForm">
+        <span class="oi oi-briefcase me-2"></span>Информация о пользователе
+    </NavLink>
+</div>
+
+<div style="@(showEditUserForm ? "display:block" : "display:none")">
+
+    <h3>Обо мне</h3>
+    <EditForm Model="accountResponse" OnValidSubmit="SubmitForm"  >
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="input-group my-3">
+            <span class="input-group-text">Имя</span>
+            <InputText @bind-Value="accountResponse.Account.FirstName" class="form-control" />
+        </div>
+        <div class="input-group my-3">
+            <span class="input-group-text">Отчество</span>
+            <InputText @bind-Value="accountResponse.Account.SecondName" class="form-control" />
+        </div>
+        <div class="input-group my-3">
+            <span class="input-group-text">Фамилия</span>
+            <InputText @bind-Value="accountResponse.Account.LastName" class="form-control" />
+        </div>
+
+        <div class="input-group my-3">
+                <span class="input-group-text">E-mail</span>
+                <InputText @bind-Value="accountResponse.Account.EMail" class="form-control me-3" />
+
+                <span class="input-group-text">Дата рождения</span>
+                <InputDate @bind-Value="accountResponse.Account.Birthday" class="form-control" />
+        </div>
+
+        <div class="col-5">
+            <div class="input-group my-3">
+                <span class="input-group-text">Пол</span>
+                <InputSelect @bind-Value="accountResponse.Account.Gender" class="form-control">
+                    <option value="UncknowGender">Я не знаю</option>
+                    <option value="Man">Мужчина</option>
+                    <option value="Woman">Женщина</option>
+                </InputSelect>
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Обновить данные</button>
+    </EditForm>
+
+</div>
+
+
+@code {
+    private bool showEditUserForm = false;
+
+    private AccountResponse accountResponse = new();
+
+    protected async override void OnInitialized()
+    {
+        string uriGetAccount = "api/Authenticate/GetAccount";
+        accountResponse.Account = new();
+        var response = await httpClient.GetFromJsonAsync<AccountResponse>(uriGetAccount);
+        if (response is not null)
+        {
+            accountResponse = response;
+        }
+    }
+
+    private async Task SubmitForm()
+    {
+        string uriUpdateAccount = "api/Authenticate/ChangeAccount";
+
+        using var response = await httpClient.PostAsJsonAsync<AccountDto>(uriUpdateAccount, accountResponse.Account);
+
+        if (response.IsSuccessStatusCode)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Данные обновлены");
+            Console.WriteLine("UpdateAccount OK");
+        }
+        else
+        {
+            Console.WriteLine("UpdateAccount ERROR");
+        }
+
+        showEditUserForm = !showEditUserForm;
+    }
+
+    private  void OnClickShowEditUserForm()
+    {
+        showEditUserForm = !showEditUserForm;
+    }
+
+}
