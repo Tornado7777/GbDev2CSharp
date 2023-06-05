@@ -17,6 +17,10 @@
             <Notification notification="item" />
         }
     }
+    else
+    {
+        <span>У вас нет уведомлений</span>
+    }
 
 </div>
 
@@ -33,7 +37,7 @@
         {
             notificationsResponse = response;
         }
-        Console.WriteLine($"*** NotificationsCount {notificationsResponse.ListNotificationDto.Count}");
+        Console.WriteLine($"*** NotificationsCount {notificationsResponse?.ListNotificationDto?.Count ?? 0}");
         StateHasChanged();
     }
 

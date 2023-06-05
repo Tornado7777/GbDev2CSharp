@@ -1,11 +1,11 @@
 ﻿@page "/cabinet"
-
+@inject UserInfo userInfo
 @inject IJSRuntime JsRuntime
 
 
 <div class="col-lg-8">
     <h2 align="center">Личный кабинет пользователя</h2>
-
+    Ваша роль: @userInfo.Role
     <div class="my-3">
         <AddNewArticle></AddNewArticle>
     </div>
