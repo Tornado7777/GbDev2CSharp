@@ -8,6 +8,7 @@
         UserNotFound = 3,
         ErrorValidation = 4,
         NullToken = 5,
-        AuthenticationHeaderValueParseError = 6
+        AuthenticationHeaderValueParseError = 6,
+        UserBaned = 12,
     }
 }

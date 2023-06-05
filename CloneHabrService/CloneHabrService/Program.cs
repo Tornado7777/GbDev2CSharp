@@ -67,7 +67,9 @@ namespace CloneHabrService
             #region Configure Services
 
             builder.Services.AddSingleton<IAuthenticateService, AuthenticateService>();
+            builder.Services.AddSingleton<INotificationService, NotificationService>();
             builder.Services.AddSingleton<IArticleService, ArticleService>();
+            builder.Services.AddSingleton<IUserService, UserService>();
 
             #endregion
 

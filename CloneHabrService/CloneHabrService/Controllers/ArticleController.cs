@@ -319,7 +319,7 @@ namespace CloneHabrService.Controllers
                         foreach (var article in articlesLidResponse.Articles)
                         {
                             var index = article.Text.IndexOf(text);
-                            if (article.Text.Length > index + countCharInLead)
+                            if (article.Text.Length > index + countCharInLead + 1)
                             {
                                 if(index == 0)
                                 {
@@ -450,7 +450,7 @@ namespace CloneHabrService.Controllers
                     {
                         commentResponse.Status = CommentStatus.DontCreateComment;
                         return BadRequest(commentResponse);
-                    }
+                    }                   
                     return Ok(commentResponse);
                 }
                 catch (Exception ex)
