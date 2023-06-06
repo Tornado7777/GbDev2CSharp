@@ -1,0 +1,10 @@
+﻿
+@foreach (var item in users)
+{
+    <User userDto="item" />
+}
+
+@code {
+    [Parameter]
+    public List<UserDto> users { get; set; }
+}

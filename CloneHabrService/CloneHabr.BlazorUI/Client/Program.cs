@@ -1,5 +1,6 @@
 using CloneHabr.BlazorUI;
 using CloneHabr.Dto;
+using CloneHabr.Dto.@enum;
 using CloneHabr.Dto.Requests;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -26,24 +27,33 @@ public class UserInfo
 {
     public int UserId { get; set; }
     public int SessionId { get; set; }
+    public Roles? Role { get; private set; } = Roles.UnregistredUser;
     public string LoginName { get; set; }
     public string Token { get; set; }
 
     public bool IsLoggedIn { get; set; }
+    public bool IsBanned { get; set; } = false;
     
     public void LogIn(RegistrationResponse response)
     {
         UserId = response.Session.User.UserId;
         LoginName = response.Session.User.Login;
         Token = response.Session.SessionToken;
+        Role = response.Session.User.Role;
         IsLoggedIn = true;
     }
 
     public void LogIn(AuthenticationResponse response)
     {
+        if (response.Session.User.EndDateLocked >= DateTime.Now)
+        {
+            IsBanned = true;
+        }
+
         UserId = response.Session.User.UserId;
         LoginName = response.Session.User.Login;
         Token = response.Session.SessionToken;
+        Role = response.Session.User.Role;
         IsLoggedIn = true;
     }
 
@@ -53,6 +63,7 @@ public class UserInfo
         SessionId = 0;
         LoginName = string.Empty;
         Token = string.Empty;
+        Role = Roles.UnregistredUser;
         IsLoggedIn = false;
     }
 
