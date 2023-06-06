@@ -3,15 +3,21 @@
 @inject IJSRuntime jsRuntime
 <h5>Добавление комментария</h5>
 
-<EditForm Model="commentDto" OnValidSubmit="SubmitForm">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<div style="@(userInfo.IsBanned ? "display:block" : "display:none")">
+    Ваш статус: бан
+</div>
 
-    <label>Текст комментария</label>
-    <InputTextArea @bind-Value="commentDto.Text" class="form-control" />
-    <br />
-    <button class="btn btn-primary" type="submit">Опубликовать</button>
-</EditForm>
+<div style="@(!userInfo.IsBanned ? "display:block" : "display:none")">
+    <EditForm Model="commentDto" OnValidSubmit="SubmitForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <label>Текст комментария</label>
+        <InputTextArea @bind-Value="commentDto.Text" class="form-control" />
+        <br />
+        <button class="btn btn-primary" type="submit">Опубликовать</button>
+    </EditForm>
+</div>
 
 
 @code {
