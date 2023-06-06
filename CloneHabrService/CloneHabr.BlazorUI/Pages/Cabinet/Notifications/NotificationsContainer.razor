@@ -36,9 +36,9 @@
         if (response.ListNotificationDto is not null && response.ListNotificationDto.Count > 0)
         {
             notificationsResponse = response;
+            StateHasChanged();
         }
         Console.WriteLine($"*** NotificationsCount {notificationsResponse?.ListNotificationDto?.Count ?? 0}");
-        StateHasChanged();
     }
 
     private void OnClickShowHideThisComponent()

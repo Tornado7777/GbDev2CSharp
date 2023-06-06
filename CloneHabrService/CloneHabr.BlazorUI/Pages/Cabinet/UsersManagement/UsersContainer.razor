@@ -1,5 +1,42 @@
-﻿<h3>UsersContainer</h3>
+﻿@using CloneHabr.Dto.Requests;
+@inject HttpClient httpClient
+
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="/cabinet" @onclick="OnClickShowHideThisComponent">
+        <span class="oi oi-person me-2"></span>Пользователи
+    </NavLink>
+</div>
+
+<div style="@(ShowThisComponent ? "display:block" : "display:none")">
+
+    <UsersList users="users" />
+
+</div>
 
 @code {
+    bool ShowThisComponent = false;
+    List<UserDto> users = new();
+    private void OnClickShowHideThisComponent()
+    {
+        ShowThisComponent = !ShowThisComponent;
+        if (ShowThisComponent)
+        {
+            GetUsers();
+        }
+    }
+
+    private async void GetUsers()
+    {
+        string uri = $"api/User/GetAllUsers";
+
+        var response = await httpClient.GetFromJsonAsync<UsersResponse>(uri);
+
+        if (response.Status == Dto.Status.UserStatus.Success)
+        {
+            users = response.ListUserDto;
+            StateHasChanged();
+        }
+
+    }
 
 }

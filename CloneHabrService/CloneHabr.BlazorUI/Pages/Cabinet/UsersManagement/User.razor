@@ -1,5 +1,54 @@
-﻿<h3>User</h3>
+﻿@using CloneHabr.Dto.Requests;
+@inject UserInfo userInfo
+@inject HttpClient httpClient
 
+<hr />
+    @userDto.UserId: @userDto.Login, @userDto.Role
+    <button class="btn-outline-primary " onclick="@UserRoleUp">
+        <span class="oi oi-chevron-top"></span>
+    </button>
+
+<button class="btn-outline-primary" onclick="@UserRoleDown">
+        <span class="oi oi-chevron-bottom"></span>
+    </button>
+<hr />
 @code {
+    [Parameter]
+    public UserDto userDto { get; set; }
+
+    private async void UserRoleUp()
+    {
+        Console.WriteLine($"*** UserRoleUp() userRole is: {userDto.Role}");
+        
+        if (userDto.Role + 1 < userInfo.Role && userDto.UserId != userInfo.UserId)
+        {
+            string uri = $"api/User/ChangeRoleUserById?userId={userDto.UserId}&role={++userDto.Role}";
+            var response = await httpClient.GetFromJsonAsync<UserResponse>(uri);
+            if (response.Status == Dto.Status.UserStatus.Success)
+            {
+                StateHasChanged();
+            }
+        }
+
+        Console.WriteLine($"*** UserRoleUp() userRole is: {userDto.Role}");
+    }
+
+    private async void UserRoleDown()
+    {
+        Console.WriteLine($"*** UserRoleUp() userRole is: {userDto.Role}");
+
+        if (userDto.Role - 1 >= Dto.@enum.Roles.StandartUser && userDto.UserId != userInfo.UserId)
+        {
+            string uri = $"api/User/ChangeRoleUserById?userId={userDto.UserId}&role={--userDto.Role}";
+            var response = await httpClient.GetFromJsonAsync<UserResponse>(uri);
+            if (response.Status == Dto.Status.UserStatus.Success)
+            {
+                StateHasChanged();
+            }
+        }
+
+        Console.WriteLine($"*** UserRoleUp() userRole is: {userDto.Role}");
+    }
+
 
 }
