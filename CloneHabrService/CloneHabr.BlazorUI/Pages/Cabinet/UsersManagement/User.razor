@@ -3,23 +3,69 @@
 @inject HttpClient httpClient
 
 <hr />
-    @userDto.UserId: @userDto.Login, @userDto.Role
+    <span>
+        @userDto.UserId: @userDto.Login, @userDto.Role
+    </span>
     <button class="btn-outline-primary " onclick="@UserRoleUp">
         <span class="oi oi-chevron-top"></span>
     </button>
 
-<button class="btn-outline-primary" onclick="@UserRoleDown">
+    <button class="btn-outline-primary" onclick="@UserRoleDown">
         <span class="oi oi-chevron-bottom"></span>
     </button>
+
+    <div style="@(!isUserBanned ? "display:block" : "display:none")">
+
+        <span>
+            <EditForm Model="innerModel">
+
+                дней бана:
+                <InputNumber @bind-Value ="@innerModel.banDays" />
+                <button class="btn btn-outline-primary" onclick="@BanUser">
+                    <span class="oi oi-ban">Забанить</span>
+                </button>
+            </EditForm>
+
+        </span>
+    </div>
+
+    <div style="@(isUserBanned ? "display:block" : "display:none")">
+        пользователь забанен до @userDto.EndDateLocked
+    </div>
+
 <hr />
 @code {
     [Parameter]
     public UserDto userDto { get; set; }
+    InnerModel innerModel = new();
+    bool isUserBanned = false;
+
+    protected override void OnInitialized()
+    {
+        if (userDto.EndDateLocked >= DateTime.Now)
+        {
+            isUserBanned = true;
+        }
+    }
+
+    private async void BanUser()
+    {
+        if (innerModel.banDays > 0)
+        {
+            string uri = $"api/User/BanedUserById?userId={userDto.UserId}&banedDay={innerModel.banDays}";
+
+            var response = await httpClient.GetFromJsonAsync<UserResponse>(uri);
+            if (response.Status == Dto.Status.UserStatus.Success)
+            {
+                userDto = response.UserDto;
+                isUserBanned = true;
+                StateHasChanged();
+            }
+        }
+    }
 
     private async void UserRoleUp()
     {
-        Console.WriteLine($"*** UserRoleUp() userRole is: {userDto.Role}");
-        
         if (userDto.Role + 1 < userInfo.Role && userDto.UserId != userInfo.UserId)
         {
             string uri = $"api/User/ChangeRoleUserById?userId={userDto.UserId}&role={++userDto.Role}";
@@ -29,14 +75,10 @@
                 StateHasChanged();
             }
         }
-
-        Console.WriteLine($"*** UserRoleUp() userRole is: {userDto.Role}");
     }
 
     private async void UserRoleDown()
     {
-        Console.WriteLine($"*** UserRoleUp() userRole is: {userDto.Role}");
-
         if (userDto.Role - 1 >= Dto.@enum.Roles.StandartUser && userDto.UserId != userInfo.UserId)
         {
             string uri = $"api/User/ChangeRoleUserById?userId={userDto.UserId}&role={--userDto.Role}";
@@ -46,9 +88,11 @@
                 StateHasChanged();
             }
         }
-
-        Console.WriteLine($"*** UserRoleUp() userRole is: {userDto.Role}");
     }
 
+    class InnerModel
+    {
+        public int banDays;
+    }
 
 }
