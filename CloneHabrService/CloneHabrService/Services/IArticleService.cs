@@ -1,5 +1,6 @@
 ﻿using CloneHabr.Dto;
 using CloneHabr.Dto.Requests;
+using CloneHabr.Dto.Status;
 
 namespace CloneHabrService.Services
 {
@@ -9,6 +10,8 @@ namespace CloneHabrService.Services
         public CreationArticleResponse Create(CreationArticleRequest creationArticleRequest);
         public List<ArticleDto> GetArticlesByTheme(ArticleTheme articlesTheme);
         public List<ArticleDto> GetArticlesByLogin(string login);
+        public ArticlesLidResponse GetArticlesByStatus(string login, ArticleStatus articleStatus);
+        public ArticleResponse ChangeArticleStatusById(string login, ArticleStatus articleStatus, int id);
         public List<ArticleDto> GetArticlesByText(string text, bool raitingSort);
         public ArticleDto GetById(int id);
 

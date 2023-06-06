@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using CloneHabr.Dto.Status;
 using CloneHabr.Data.Entity;
 using CloneHabr.Dto.@enum;
+using static System.Net.Mime.MediaTypeNames;
+using CloneHabr.BlazorUI.Shared.CommentsComponents;
 
 namespace CloneHabrService.Services.Impl
 {
@@ -32,11 +34,12 @@ namespace CloneHabrService.Services.Impl
             {
                 return new CreationArticleResponse { Status = CreationArticleStatus.UserNotFound };
             }
-            if(user.EndDateLocked < DateTime.Now)
+            if (user.EndDateLocked < DateTime.Now)
             {
                 return new CreationArticleResponse { Status = CreationArticleStatus.UserBaned };
             }
-            var article = new Article { 
+            var article = new Article
+            {
                 Name = creationArticleRequest.Name,
                 Text = creationArticleRequest.Text,
                 Raiting = 0,
@@ -46,7 +49,7 @@ namespace CloneHabrService.Services.Impl
                 User = user
             };
             context.Articles.Add(article);
-            if(context.SaveChanges() < 0)
+            if (context.SaveChanges() < 0)
             {
                 return new CreationArticleResponse { Status = CreationArticleStatus.ErrorSaveDB };
             }
@@ -66,7 +69,7 @@ namespace CloneHabrService.Services.Impl
                     LoginUser = creationArticleRequest.LoginUser
                 }
             };
-                
+
 
         }
 
@@ -84,18 +87,18 @@ namespace CloneHabrService.Services.Impl
             if (articlesTheme == ArticleTheme.All)
             {
                 articles = (from article in context.Articles
-                                    orderby article.CreationDate descending
-                                    select article).Take(10).ToList();
+                            orderby article.CreationDate descending
+                            select article).Take(10).ToList();
             }
             else
             {
                 articles = (from article in context.Articles
-                                where article.ArticleTheme == (int)articlesTheme
-                                orderby article.CreationDate descending
-                                select article).Take(10).ToList();
+                            where article.ArticleTheme == (int)articlesTheme
+                            orderby article.CreationDate descending
+                            select article).Take(10).ToList();
             }
 
-            if(!articles.Any())
+            if (!articles.Any())
             {
                 return null;
             }
@@ -131,14 +134,14 @@ namespace CloneHabrService.Services.Impl
                     Name = article.Name,
                     Text = article.Text,
                     ArticleTheme = article.ArticleTheme,
-                    Raiting = article.Raiting ?? 0, 
+                    Raiting = article.Raiting ?? 0,
                     Status = article.Status,
                     LoginUser = loginUser,
                     CreationDate = article.CreationDate,
                     Comments = commnetDto
                 });
             }
-            return articlesDto;            
+            return articlesDto;
         }
 
         /// <summary>
@@ -154,7 +157,7 @@ namespace CloneHabrService.Services.Impl
                             orderby article.CreationDate descending
                             where article.User.Login == login
                             select article).ToList();
-            
+
 
             if (!articles.Any())
             {
@@ -216,7 +219,7 @@ namespace CloneHabrService.Services.Impl
             else
             {
                 articles = (from article in context.Articles
-                            where article.Text.Contains(text) 
+                            where article.Text.Contains(text)
                             orderby article.CreationDate descending
                             select article).ToList();
             }
@@ -346,7 +349,8 @@ namespace CloneHabrService.Services.Impl
                 if (context.SaveChanges() < 0)
                 {
                     likeResponse.Status = LikeStatus.DontSaveLikeDB;
-                    likeResponse.Like = new LikeDto { 
+                    likeResponse.Like = new LikeDto
+                    {
                         CreationDate = like.CreationDate,
                         IdArticle = like.IdArticle,
                         Login = login
@@ -410,27 +414,27 @@ namespace CloneHabrService.Services.Impl
                 commentResponse.Status = CommentStatus.ArticleNotFound;
                 return commentResponse;
             }
-            
-                var comment = new Comment
-                {
-                    CreationDate = DateTime.Now,
-                    ArticleId = commentDto.ArticleId,
-                    Text = commentDto.Text,
-                    User = user
-                };
-                context.Comments.Add(comment);
-                if (context.SaveChanges() < 0)
-                {
+
+            var comment = new CloneHabr.Data.Comment
+            {
+                CreationDate = DateTime.Now,
+                ArticleId = commentDto.ArticleId,
+                Text = commentDto.Text,
+                User = user
+            };
+            context.Comments.Add(comment);
+            if (context.SaveChanges() < 0)
+            {
                 commentResponse.Status = CommentStatus.DontSaveCommentDB;
                 commentResponse.Comment = new CommentDto
-                    {
-                        CreationDate = comment.CreationDate,
-                        ArticleId = commentDto.ArticleId,
-                        Text = commentDto.Text,
-                        OwnerUser = login
-                    };
-                    return commentResponse;
-                }
+                {
+                    CreationDate = comment.CreationDate,
+                    ArticleId = commentDto.ArticleId,
+                    Text = commentDto.Text,
+                    OwnerUser = login
+                };
+                return commentResponse;
+            }
             //добавляю к рейтингу пользователя создавшего статью
 
             //если текст содержит @moderator создается уведомления для модераторов и админов
@@ -480,6 +484,180 @@ namespace CloneHabrService.Services.Impl
             return commentResponse;
         }
 
-        
+        public ArticlesLidResponse GetArticlesByStatus(string login, ArticleStatus articleStatus)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var articlesLidResponse = new ArticlesLidResponse();
+            var user = context.Users.FirstOrDefault(x => x.Login == login);
+            if (user != null)
+            {
+                if (user.RoleId < (int)Roles.Moderator)
+                {
+                    articlesLidResponse.Status = ArtclesLidStatus.UserAccessDenied;
+                    return articlesLidResponse;
+                }
+            }
+            else
+            {
+                articlesLidResponse.Status = ArtclesLidStatus.UserNotFound;
+                return articlesLidResponse;
+            }
+
+            var articles = (from article in context.Articles
+                            where article.Status == (int)articleStatus
+                            orderby article.CreationDate descending
+                            select article).ToList();
+
+
+            if (!articles.Any())
+            {
+                articlesLidResponse.Status = ArtclesLidStatus.NotFoundArticle;
+                return articlesLidResponse;
+            }
+            var articlesDto = new List<ArticleDto>();
+            foreach (var article in articles)
+            {
+                var comments = context.Comments.Where(art => art.ArticleId == article.Id).Include(x => x.User).ToList();
+                var commnetDto = new List<CommentDto>();
+                if (comments.Any())
+                {
+                    foreach (var comment in comments)
+                    {
+                        commnetDto.Add(new CommentDto
+                        {
+                            Id = comment.Id,
+                            Text = comment.Text,
+                            Raiting = comment.Raiting ?? 0,
+                            CreationDate = comment.CreationDate,
+                            OwnerUser = comment.User.Login
+                        });
+                    }
+                }
+                //здесь также можно сделать проверку статуса статьи
+                if (article == null)
+                {
+                    continue;
+                }
+                var loginUser = context.Users.FirstOrDefault(x => x.UserId == article.UserId).Login;
+                articlesDto.Add(new ArticleDto
+                {
+                    Id = article.Id,
+                    Name = article.Name,
+                    Text = article.Text,
+                    ArticleTheme = article.ArticleTheme,
+                    Raiting = article.Raiting ?? 0,
+                    Status = article.Status,
+                    LoginUser = loginUser,
+                    CreationDate = article.CreationDate,
+                    Comments = commnetDto
+                });
+            }
+            if (articlesDto.Count == 0)
+            {
+                articlesLidResponse.Status = ArtclesLidStatus.ErrorRead;
+                return articlesLidResponse;
+            }
+
+            articlesLidResponse.Status = ArtclesLidStatus.Success;
+            articlesLidResponse.Articles = articlesDto;
+            return articlesLidResponse;
+        }
+
+        public ArticleResponse ChangeArticleStatusById(string login, ArticleStatus articleStatus, int id)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var articleResponse = new ArticleResponse();
+            var user = context.Users.FirstOrDefault(x => x.Login == login);
+            if (user != null)
+            {
+                if (user.RoleId < (int)Roles.Moderator)
+                {
+                    articleResponse.Status = ArtclesLidStatus.UserAccessDenied;
+                    return articleResponse;
+                }
+            }
+            else
+            {
+                articleResponse.Status = ArtclesLidStatus.UserNotFound;
+                return articleResponse;
+            }
+
+            var article = context.Articles.FirstOrDefault(x => x.Id == id);
+
+
+            if (article == null)
+            {
+                articleResponse.Status = ArtclesLidStatus.NotFoundArticle;
+                return articleResponse;
+            }
+
+            article.Status = (int)articleStatus;
+            if (context.SaveChanges() < 0)
+            {
+                articleResponse.Status = ArtclesLidStatus.ErrorSaveDB;
+                return articleResponse;
+            }
+            else
+            {
+                try
+                {
+                    var notification = new Notification
+                    {
+                        Text = $"Статус вашей статьи <<{article.Name}>> был изменен на {articleStatus.ToString()} модератором {login}",
+                        ArticleId = article.Id,
+                        CreationDate = DateTime.Now,
+                        FromUserId = user.UserId,
+                        ToUserId = article.UserId,
+                    };
+                    context.Notifications.Add(notification);
+                    if (context.SaveChanges() < 0)
+                    {
+                        articleResponse.Status = ArtclesLidStatus.ErrorSendNotification;
+                        return articleResponse;
+                    }
+                }
+                catch
+                {
+                    articleResponse.Status = ArtclesLidStatus.ErrorSendNotification;
+                    return articleResponse;
+                }
+            }
+
+            var comments = context.Comments.Where(art => art.ArticleId == article.Id).Include(x => x.User).ToList();
+            var commnetDto = new List<CommentDto>();
+            if (comments.Any())
+            {
+                foreach (var comment in comments)
+                {
+                    commnetDto.Add(new CommentDto
+                    {
+                        Id = comment.Id,
+                        Text = comment.Text,
+                        Raiting = comment.Raiting ?? 0,
+                        CreationDate = comment.CreationDate,
+                        OwnerUser = comment.User.Login
+                    });
+                }
+            }
+
+            var loginUser = context.Users.FirstOrDefault(x => x.UserId == article.UserId).Login;
+            articleResponse.Article = new ArticleDto
+            {
+                Id = article.Id,
+                Name = article.Name,
+                Text = article.Text,
+                ArticleTheme = article.ArticleTheme,
+                Raiting = article.Raiting ?? 0,
+                Status = article.Status,
+                LoginUser = loginUser,
+                CreationDate = article.CreationDate,
+                Comments = commnetDto
+            };
+
+            articleResponse.Status = ArtclesLidStatus.Success;
+            return articleResponse;
+        }
     }
 }
