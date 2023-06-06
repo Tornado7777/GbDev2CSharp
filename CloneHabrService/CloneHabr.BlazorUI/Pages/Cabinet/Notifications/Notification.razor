@@ -6,6 +6,9 @@
 <span>
     @notification.Text
 </span>
+<div style="@((notification.ArticleId > 0) ? "display:block" : "display:none")">
+    <NavLink class="nav-link col-3" href="@($"article/{notification.ArticleId}")">Ссылка на материал</NavLink>
+</div>
 
 @code {
     [Parameter]
