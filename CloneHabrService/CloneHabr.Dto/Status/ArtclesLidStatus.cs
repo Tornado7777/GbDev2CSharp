@@ -13,6 +13,11 @@ namespace CloneHabr.Dto.Status
         ErrorRead = 2,
         EmptyText = 3,
         NullToken = 5,
+        ServiceError = 6,
+        ErrorSaveDB = 7,
+        ErrorSendNotification = 8,
+        UserNotFound = 9,
+        UserAccessDenied = 11,
         UserBaned = 12,
     }
 }

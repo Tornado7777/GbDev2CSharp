@@ -470,5 +470,89 @@ namespace CloneHabrService.Controllers
                 Status = CommentStatus.AuthenticationHeaderValueParseError
             });
         }
+
+        [HttpGet]
+        [Route("GetArticlesByStatus")]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status200OK)]
+        public IActionResult GetArticlesByStatus([FromQuery] ArticleStatus articleStatus)
+        {
+            var authorizationHeader = Request.Headers[HeaderNames.Authorization];
+            var articlesLidResponse = new ArticlesLidResponse();
+            if (AuthenticationHeaderValue.TryParse(authorizationHeader, out var headerValue))
+            {
+                //var scheme = headerValue.Scheme; // Bearer
+                var sessionToken = headerValue.Parameter; // Token
+                //проверка на null или пустой
+                if (string.IsNullOrEmpty(sessionToken))
+                    return BadRequest(new ArticlesLidResponse
+                    {
+                        Status = ArtclesLidStatus.NullToken
+                    });
+                try
+                {
+                    JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+                    var jwt = tokenHandler.ReadJwtToken(sessionToken);
+                    string login = jwt.Claims.First(c => c.Type == "unique_name").Value;
+                    articlesLidResponse = _articleService.GetArticlesByStatus(login, articleStatus);
+                    if (articlesLidResponse == null)
+                    {
+                        articlesLidResponse.Status = ArtclesLidStatus.ServiceError;
+                    }
+
+                }
+                catch
+                {
+                    return BadRequest(new ArticlesLidResponse
+                    {
+
+                        Status = ArtclesLidStatus.ServiceError
+                    });
+                }
+            }
+            return Ok(articlesLidResponse);
+        }
+
+        [HttpGet]
+        [Route("ChangeArticleStatusById")]
+        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status200OK)]
+        public IActionResult ChangeArticleStatusById([FromQuery] ArticleStatus articleStatus, [FromQuery] int articleId)
+        {
+            var authorizationHeader = Request.Headers[HeaderNames.Authorization];
+            var articleResponse = new ArticleResponse();
+            if (AuthenticationHeaderValue.TryParse(authorizationHeader, out var headerValue))
+            {
+                //var scheme = headerValue.Scheme; // Bearer
+                var sessionToken = headerValue.Parameter; // Token
+                //проверка на null или пустой
+                if (string.IsNullOrEmpty(sessionToken))
+                    return BadRequest(new ArticleResponse
+                    {
+                        Status = ArtclesLidStatus.NullToken
+                    });
+                try
+                {
+                    JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+                    var jwt = tokenHandler.ReadJwtToken(sessionToken);
+                    string login = jwt.Claims.First(c => c.Type == "unique_name").Value;
+                    articleResponse = _articleService.ChangeArticleStatusById(login, articleStatus, articleId);
+                    if (articleResponse == null)
+                    {
+                        articleResponse.Status = ArtclesLidStatus.ServiceError;
+                    }
+
+                }
+                catch
+                {
+                    return BadRequest(new ArticleResponse
+                    {
+
+                        Status = ArtclesLidStatus.ServiceError
+                    });
+                }
+            }
+            return Ok(articleResponse);
+        }
     }
 }
