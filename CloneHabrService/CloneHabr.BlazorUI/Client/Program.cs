@@ -32,6 +32,7 @@ public class UserInfo
     public string Token { get; set; }
 
     public bool IsLoggedIn { get; set; }
+    public bool IsBanned { get; set; } = false;
     
     public void LogIn(RegistrationResponse response)
     {
@@ -44,6 +45,11 @@ public class UserInfo
 
     public void LogIn(AuthenticationResponse response)
     {
+        if (response.Session.User.EndDateLocked >= DateTime.Now)
+        {
+            IsBanned = true;
+        }
+
         UserId = response.Session.User.UserId;
         LoginName = response.Session.User.Login;
         Token = response.Session.SessionToken;
