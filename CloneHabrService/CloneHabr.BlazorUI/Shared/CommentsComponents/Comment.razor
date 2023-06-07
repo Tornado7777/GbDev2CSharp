@@ -1,11 +1,33 @@
-﻿
+﻿@inject UserInfo userInfo
+@inject HttpClient httpClient
+
 <hr />
 @commentDto.Text
 <br />
 <span>Автор:  @commentDto.OwnerUser</span>
 <span class="ms-5">Дата:  @commentDto.CreationDate</span>
 
+    <div class="my-3" style="@((userInfo.Role == Dto.@enum.Roles.Moderator || userInfo.Role == Dto.@enum.Roles.Administrator) ? "display:block" : "display:none")">
+
+        <button class="btn btn-outline-primary" onclick="@DeleteComment">
+            <span class="oi oi-ban">Удалить</span>
+        </button>
+    </div>
+
 @code {
     [Parameter]
     public CommentDto commentDto { get; set; }
+
+    private async void DeleteComment()
+    {
+        string uri = "api/Article/ChangeComment";
+        commentDto.Text = $"Комментарий удален по решению пользователя {userInfo.LoginName}";
+        using var response = await httpClient.PostAsJsonAsync<CommentDto>(uri, commentDto);
+
+        if (response.IsSuccessStatusCode)
+        {
+            StateHasChanged();
+        }
+    }
+
 }
