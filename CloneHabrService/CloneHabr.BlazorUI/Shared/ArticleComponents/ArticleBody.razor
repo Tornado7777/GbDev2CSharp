@@ -1,0 +1,41 @@
+﻿
+@if(mainText is not null)
+{
+    <h3>@articleDto.Name</h3>
+    
+    foreach (var item in mainText)
+    {
+        <p>
+            @item
+        </p>
+    }
+    <hr />
+
+    <div class="mx-3 my-4">
+        Автор: @articleDto.LoginUser, @articleDto.CreationDate
+    </div>
+}
+else
+{
+    <p>Загрузка...</p>
+}
+
+@code {
+    [Parameter]
+    public ArticleDto articleDto { get; set; }
+
+    string[] mainText;
+
+    protected override void OnParametersSet()
+    {
+        if (articleDto.Text is not null)
+        {
+
+            mainText = articleDto.Text.Split(
+                new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None
+            );
+            StateHasChanged();
+        }
+    }
+
+}

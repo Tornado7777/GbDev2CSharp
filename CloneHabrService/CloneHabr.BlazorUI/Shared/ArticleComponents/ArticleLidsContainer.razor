@@ -1,0 +1,30 @@
+﻿@using CloneHabr.Dto.Requests;
+@inject HttpClient httpClient
+
+<ArticleLidsList articlesLidResponses="@articlesLidResponses"  />
+
+@code {
+    [Parameter]
+    public int themeNumber { get; set; }
+    List<ArticleDto> articlesLidResponses = new();
+
+
+    protected override async void OnInitialized()
+    {
+        string uri = $"api/Article/GetArticlesLidByTheme?articleTheme={themeNumber}";
+
+        var response = await httpClient.GetFromJsonAsync<ArticlesLidResponse>(uri);
+        articlesLidResponses = response.Articles;
+
+        Console.WriteLine(response.Status);
+        Console.WriteLine(response.Articles.Count);
+
+        foreach (var item in articlesLidResponses)
+        {
+            Console.WriteLine(item.Name);
+        }
+        StateHasChanged();
+
+    }
+
+}
