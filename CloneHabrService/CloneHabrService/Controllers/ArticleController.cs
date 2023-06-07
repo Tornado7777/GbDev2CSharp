@@ -471,6 +471,55 @@ namespace CloneHabrService.Controllers
             });
         }
 
+
+        [HttpPost]
+        [Route("ChangeComment")]
+        [ProducesResponseType(typeof(CommentResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(CommentResponse), StatusCodes.Status200OK)]
+        public IActionResult ChangeComment([FromBody] CommentDto commentDto)
+        {
+            var authorizationHeader = Request.Headers[HeaderNames.Authorization];
+            if (AuthenticationHeaderValue.TryParse(authorizationHeader, out var headerValue))
+            {
+                var sessionToken = headerValue.Parameter; // Token
+                //проверка на null или пустой
+                if (string.IsNullOrEmpty(sessionToken))
+                    return BadRequest(new CommentResponse
+                    {
+                        Comment = commentDto,
+                        Status = CommentStatus.NullToken
+                    });
+                try
+                {
+                    JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+                    var jwt = tokenHandler.ReadJwtToken(sessionToken);
+                    string login = jwt.Claims.First(c => c.Type == "unique_name").Value; 
+                    var commentResponse = _articleService.ChangeComment(commentDto, login);
+                    if (commentResponse == null)
+                    {
+                        commentResponse.Status = CommentStatus.DontCreateComment;
+                        return BadRequest(commentResponse);
+                    }
+                    return Ok(commentResponse);
+                }
+                catch
+                {
+                    return BadRequest(new CommentResponse
+                    {
+                        Comment = commentDto,
+                        Status = CommentStatus.ExceptionComment
+                    });
+                }
+
+            }
+
+            return Ok(new CommentResponse
+            {
+                Comment = commentDto,
+                Status = CommentStatus.AuthenticationHeaderValueParseError
+            });
+        }
+
         [HttpGet]
         [Route("GetArticlesByStatus")]
         [ProducesResponseType(typeof(ArticlesLidResponse), StatusCodes.Status400BadRequest)]
