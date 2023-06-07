@@ -7,8 +7,11 @@
 <div class="col-lg-8">
     <h2 align="center">Личный кабинет пользователя</h2>
     Ваша роль: @userInfo.Role
-    <br />
-    <div style="@((!userInfo.IsBanned) ? "display:block" : "display:none")">
+    <div class="my-3" style="@(userInfo.IsBanned ? "display:block" : "display:none")">
+        Ваш статус: бан
+    </div>
+    
+    <div class="my-3" style="@(!userInfo.IsBanned ? "display:block" : "display:none")">
         Ваш статус: активен
         <div class="my-3">
             <AddNewArticle></AddNewArticle>
@@ -18,10 +21,6 @@
             <EditAccountComponent></EditAccountComponent>
         </div>
 
-        <div class="my-3">
-            <NotificationsContainer></NotificationsContainer>
-        </div>
-
         <div class="my-3" style="@((userInfo.Role == Dto.@enum.Roles.Moderator || userInfo.Role == Dto.@enum.Roles.Administrator) ? "display:block" : "display:none")">
             <UsersContainer></UsersContainer>
 
@@ -29,8 +28,8 @@
 
     </div>
 
-    <div style="@(userInfo.IsBanned ? "display:block" : "display:none")">
-        Ваш статус: бан
+    <div class="my-3">
+        <NotificationsContainer></NotificationsContainer>
     </div>
 
 </div>

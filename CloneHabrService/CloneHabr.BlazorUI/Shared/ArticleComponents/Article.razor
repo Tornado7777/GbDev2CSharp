@@ -21,9 +21,11 @@
         <div class="mx-3 my-4">
             Автор: @articleDto.LoginUser, @articleDto.CreationDate
 
-            <button class="btn btn-outline-secondary ms-5" @onclick="OnClickLikeButton">
-                <span class="oi oi-thumb-up "> @likesCounter</span>
-            </button>
+            <div style="@(!userInfo.IsBanned ? "display:block" : "display:none")">
+                <button class="btn btn-outline-secondary ms-5" @onclick="OnClickLikeButton">
+                    <span class="oi oi-thumb-up "> @likesCounter</span>
+                </button>
+            </div>
             
         </div>
         
