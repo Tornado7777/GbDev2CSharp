@@ -19,6 +19,7 @@ namespace CloneHabr.Dto.Status
         DontCreateComment = 8,
         ExceptionComment = 9,
         ErrorSendModerator = 10,
+        UserAccessDenied = 11,
         UserBaned = 12,
     }
 }

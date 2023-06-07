@@ -8,6 +8,9 @@ using CloneHabr.Data.Entity;
 using CloneHabr.Dto.@enum;
 using static System.Net.Mime.MediaTypeNames;
 using CloneHabr.BlazorUI.Shared.CommentsComponents;
+using CloneHabr.BlazorUI.Pages.Cabinet.UsersManagement;
+using CloneHabr.BlazorUI.Pages;
+using CloneHabr.BlazorUI.Shared.ArticleComponents;
 
 namespace CloneHabrService.Services.Impl
 {
@@ -38,7 +41,7 @@ namespace CloneHabrService.Services.Impl
             {
                 return new CreationArticleResponse { Status = CreationArticleStatus.UserBaned };
             }
-            var article = new Article
+            var article = new CloneHabr.Data.Article
             {
                 Name = creationArticleRequest.Name,
                 Text = creationArticleRequest.Text,
@@ -83,7 +86,7 @@ namespace CloneHabrService.Services.Impl
         {
             using IServiceScope scope = _serviceScopeFactory.CreateScope();
             ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
-            var articles = new List<Article>();
+            var articles = new List<CloneHabr.Data.Article>();
             if (articlesTheme == ArticleTheme.All)
             {
                 articles = (from article in context.Articles
@@ -208,7 +211,7 @@ namespace CloneHabrService.Services.Impl
         {
             using IServiceScope scope = _serviceScopeFactory.CreateScope();
             ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
-            var articles = new List<Article>();
+            var articles = new List<CloneHabr.Data.Article>();
             if (raitingSort)
             {
                 articles = (from article in context.Articles
@@ -389,6 +392,21 @@ namespace CloneHabrService.Services.Impl
                 Login = login
             };
 
+            var notification = new Notification
+            {
+                Text = $"Вашу статью <<{article.Name}>> лайкнули {like.CreationDate}",
+                ArticleId = article.Id,
+                CreationDate = like.CreationDate,
+                FromUserId = user.UserId,
+                ToUserId = article.UserId,
+            };
+            if (!SendNotification(context, notification))
+            {
+                likeResponse.Status = LikeStatus.ErrorSendNotification;
+                return likeResponse;
+            }
+
+
             return likeResponse;
         }
 
@@ -440,33 +458,19 @@ namespace CloneHabrService.Services.Impl
             //если текст содержит @moderator создается уведомления для модераторов и админов
             if (commentDto.Text.Contains("@moderator"))
             {
-                try
+
+                var notification = new Notification
                 {
-                    var notification = new Notification
-                    {
-                        Text = commentDto.Text,
-                        ArticleId = commentDto.ArticleId,
-                        CreationDate = DateTime.Now,
-                        FromUserId = user.UserId,
-                        CommentId = comment.Id,
-                        ForUserRole = (int?)Roles.Moderator
-                    };
-                    context.Notifications.Add(notification);
-                    if (context.SaveChanges() < 0)
-                    {
-                        throw new Exception();
-                    }
-                }
-                catch
+                    Text = commentDto.Text,
+                    ArticleId = commentDto.ArticleId,
+                    CreationDate = DateTime.Now,
+                    FromUserId = user.UserId,
+                    CommentId = comment.Id,
+                    ForUserRole = (int?)Roles.Moderator
+                };
+                if (!SendNotification(context, notification))
                 {
                     commentResponse.Status = CommentStatus.ErrorSendModerator;
-                    commentResponse.Comment = new CommentDto
-                    {
-                        CreationDate = comment.CreationDate,
-                        ArticleId = commentDto.ArticleId,
-                        Text = commentDto.Text,
-                        OwnerUser = login
-                    };
                     return commentResponse;
                 }
             }
@@ -601,24 +605,15 @@ namespace CloneHabrService.Services.Impl
             }
             else
             {
-                try
+                var notification = new Notification
                 {
-                    var notification = new Notification
-                    {
-                        Text = $"Статус вашей статьи <<{article.Name}>> был изменен на {articleStatus.ToString()} модератором {login}",
-                        ArticleId = article.Id,
-                        CreationDate = DateTime.Now,
-                        FromUserId = user.UserId,
-                        ToUserId = article.UserId,
-                    };
-                    context.Notifications.Add(notification);
-                    if (context.SaveChanges() < 0)
-                    {
-                        articleResponse.Status = ArtclesLidStatus.ErrorSendNotification;
-                        return articleResponse;
-                    }
-                }
-                catch
+                    Text = $"Статус вашей статьи <<{article.Name}>> был изменен на {articleStatus.ToString()} модератором {login}",
+                    ArticleId = article.Id,
+                    CreationDate = DateTime.Now,
+                    FromUserId = user.UserId,
+                    ToUserId = article.UserId,
+                };
+                if (!SendNotification(context, notification))
                 {
                     articleResponse.Status = ArtclesLidStatus.ErrorSendNotification;
                     return articleResponse;
@@ -659,5 +654,114 @@ namespace CloneHabrService.Services.Impl
             articleResponse.Status = ArtclesLidStatus.Success;
             return articleResponse;
         }
+
+        public CommentResponse ChangeComment(CommentDto commentDto, string login)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            ClonehabrDbContext context = scope.ServiceProvider.GetRequiredService<ClonehabrDbContext>();
+            var user = context.Users.FirstOrDefault(u => u.Login == login);
+            var article = context.Articles.FirstOrDefault(u => u.Id == commentDto.ArticleId);
+            var commentResponse = new CommentResponse();
+
+            if (user != null)
+            {
+                if (user.RoleId < (int)Roles.Moderator)
+                {
+                    commentResponse.Status = CommentStatus.UserAccessDenied;
+                    return commentResponse;
+                }
+            }
+            else
+            {
+                commentResponse.Status = CommentStatus.UserNotFound;
+                return commentResponse;
+            }
+
+            if (user.EndDateLocked < DateTime.Now)
+            {
+                commentResponse.Status = CommentStatus.UserBaned;
+                return commentResponse;
+            }
+            if (article == null)
+            {
+                commentResponse.Status = CommentStatus.ArticleNotFound;
+                return commentResponse;
+            }
+            var ownerUser = context.Users.FirstOrDefault(u => u.Login == commentDto.OwnerUser);
+            var comment = new CloneHabr.Data.Comment
+            {
+                Id = commentDto.Id ?? 0,
+                CreationDate = commentDto.CreationDate,
+                ArticleId = commentDto.ArticleId,
+                Text = commentDto.Text,
+                User = ownerUser ?? user
+            };
+            context.Comments.Update(comment);
+            if (context.SaveChanges() < 0)
+            {
+                commentResponse.Status = CommentStatus.DontSaveCommentDB;
+                commentResponse.Comment = new CommentDto
+                {
+                    CreationDate = comment.CreationDate,
+                    ArticleId = commentDto.ArticleId,
+                    Text = commentDto.Text,
+                    OwnerUser = commentDto.OwnerUser,
+                };
+                return commentResponse;
+            }
+            //отправить уведомление пользователю
+
+            var notification = new Notification
+            {
+                Text = $"Ваш комментарий от {comment.CreationDate} к статье {article.Name} изменен модераторм {login}.",
+                ArticleId = commentDto.ArticleId,
+                CreationDate = DateTime.Now,
+                FromUserId = user.UserId,
+                CommentId = comment.Id,
+                ToUserId = comment.UserId
+            };
+            if (!SendNotification(context, notification))
+            {
+                commentResponse.Status = CommentStatus.ErrorSendModerator;
+                commentResponse.Comment = new CommentDto
+                {
+                    CreationDate = comment.CreationDate,
+                    ArticleId = commentDto.ArticleId,
+                    Text = commentDto.Text,
+                    OwnerUser = login
+                };
+                return commentResponse;
+            }
+
+            commentResponse.Status = CommentStatus.AddComment;
+            commentResponse.Comment = new CommentDto
+            {
+                Id = comment.Id,
+                CreationDate = comment.CreationDate,
+                ArticleId = commentDto.ArticleId,
+                Text = commentDto.Text,
+                OwnerUser = login
+            };
+
+            return commentResponse;
+        }
+
+        private bool SendNotification(ClonehabrDbContext context, Notification notification)
+        {
+            try
+            {
+                context.Notifications.Add(notification);
+                if (context.SaveChanges() < 0)
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
+
     }
 }
