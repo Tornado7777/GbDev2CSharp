@@ -87,12 +87,13 @@ namespace CloneHabrService.Services.Impl
             {
                 articles = (from article in context.Articles
                             orderby article.CreationDate descending
+                            where article.Status == (int) ArticleStatus.Publicate
                             select article).Take(10).ToList();
             }
             else
             {
                 articles = (from article in context.Articles
-                            where article.ArticleTheme == (int)articlesTheme
+                            where article.ArticleTheme == (int)articlesTheme && article.Status == (int)ArticleStatus.Publicate
                             orderby article.CreationDate descending
                             select article).Take(10).ToList();
             }
@@ -211,14 +212,14 @@ namespace CloneHabrService.Services.Impl
             if (raitingSort)
             {
                 articles = (from article in context.Articles
-                            where article.Text.Contains(text)
+                            where article.Text.Contains(text) && article.Status == (int)ArticleStatus.Publicate
                             orderby article.Raiting descending
                             select article).ToList();
             }
             else
             {
                 articles = (from article in context.Articles
-                            where article.Text.Contains(text)
+                            where article.Text.Contains(text) && article.Status == (int)ArticleStatus.Publicate
                             orderby article.CreationDate descending
                             select article).ToList();
             }
