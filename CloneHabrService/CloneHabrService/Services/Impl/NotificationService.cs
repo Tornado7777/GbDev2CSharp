@@ -113,6 +113,7 @@ namespace CloneHabrService.Services.Impl
             CommentDto commentDto = null;
             if (comment != null)
             {
+                var comentUser = context.Users.FirstOrDefault(x => x.UserId == comment.UserId)?.Login;
                 commentDto = new CommentDto
                 {
                     Id = comment.Id,
@@ -120,7 +121,7 @@ namespace CloneHabrService.Services.Impl
                     ArticleId = comment.ArticleId ?? 0,
                     Raiting = comment.Raiting ?? 0,
                     //может быть ошибка не подзагрузит логин
-                    OwnerUser = comment.User.Login
+                    OwnerUser = comentUser ?? ""
 
                 };
             }

@@ -6,11 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using CloneHabr.Dto.Status;
 using CloneHabr.Data.Entity;
 using CloneHabr.Dto.@enum;
-using static System.Net.Mime.MediaTypeNames;
-using CloneHabr.BlazorUI.Shared.CommentsComponents;
-using CloneHabr.BlazorUI.Pages.Cabinet.UsersManagement;
-using CloneHabr.BlazorUI.Pages;
-using CloneHabr.BlazorUI.Shared.ArticleComponents;
+
 
 namespace CloneHabrService.Services.Impl
 {
