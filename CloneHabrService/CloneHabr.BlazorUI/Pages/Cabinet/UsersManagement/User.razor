@@ -2,38 +2,50 @@
 @inject UserInfo userInfo
 @inject HttpClient httpClient
 
-<hr />
-    <span>
-        @userDto.UserId: @userDto.Login, @userDto.Role
-    </span>
-    <button class="btn-outline-primary " onclick="@UserRoleUp">
-        <span class="oi oi-chevron-top"></span>
-    </button>
+<div class="card mt-3 mb-3 " >
 
-    <button class="btn-outline-primary" onclick="@UserRoleDown">
-        <span class="oi oi-chevron-bottom"></span>
-    </button>
+    <div class="card-header">
+        ID: @userDto.UserId, @userDto.Login
+    </div>
 
-    <div style="@(!isUserBanned ? "display:block" : "display:none")">
+    <div class="card-body">
 
         <span>
-            <EditForm Model="innerModel">
-
-                дней бана:
-                <InputNumber @bind-Value ="@innerModel.banDays" />
-                <button class="btn btn-outline-primary" onclick="@BanUser">
-                    <span class="oi oi-ban">Забанить</span>
-                </button>
-            </EditForm>
-
+             @userDto.Role
         </span>
-    </div>
+        <button class="btn-outline-primary " onclick="@UserRoleUp">
+            <span class="oi oi-chevron-top"></span>
+        </button>
 
-    <div style="@(isUserBanned ? "display:block" : "display:none")">
-        пользователь забанен до @userDto.EndDateLocked
-    </div>
+        <button class="btn-outline-primary" onclick="@UserRoleDown">
+            <span class="oi oi-chevron-bottom"></span>
+        </button>
 
-<hr />
+        <div style="@(!isUserBanned ? "display:block" : "display:none")">
+
+            <span>
+                <EditForm Model="innerModel">
+
+                    дней бана:
+                    <InputNumber @bind-Value ="@innerModel.banDays" />
+                    <button class="btn btn-outline-primary" onclick="@BanUser">
+                        <span class="oi oi-ban"> Забанить</span>
+                    </button>
+                </EditForm>
+
+            </span>
+        </div>
+
+        <div style="@(isUserBanned ? "display:block" : "display:none")">
+            <div class="alert alert-danger mt-3">
+
+                пользователь забанен до @userDto.EndDateLocked
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @code {
     [Parameter]
     public UserDto userDto { get; set; }
