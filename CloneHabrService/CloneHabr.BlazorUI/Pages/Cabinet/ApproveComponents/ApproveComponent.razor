@@ -1,0 +1,33 @@
+﻿@inject HttpClient httpClient
+@inject IJSRuntime jsRuntime
+@using CloneHabr.Dto.Requests;
+@using CloneHabr.Dto.Status;
+
+
+<button class="btn btn-outline-secondary ms-5" @onclick="OnClickApproveButton">
+    <span class="oi oi-thumb-up"> Допустимо</span>
+</button>
+
+
+@code {
+    [Parameter]
+    public int articleId { get; set; } = 0;
+
+    [Parameter]
+    public EventCallback<int> OnArticleApproved { get; set; }
+
+    private async void OnClickApproveButton()
+    {
+        string uri = $"api/Article/ChangeArticleStatusById?articleStatus={ArticleStatus.Publicate}&articleId={articleId}";
+
+        var changeStatusResponse = await httpClient.GetFromJsonAsync<ArticleResponse>(uri);
+        if (changeStatusResponse.Status == ArtclesLidStatus.Success)
+        {
+            await OnArticleApproved.InvokeAsync(articleId);
+            await jsRuntime.InvokeVoidAsync("alert", "Статья одобрена к публикации");
+        }
+
+    }
+
+
+}

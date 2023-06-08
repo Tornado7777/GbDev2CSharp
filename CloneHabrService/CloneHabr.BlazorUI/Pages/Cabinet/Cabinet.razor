@@ -1,4 +1,5 @@
 ﻿@page "/cabinet"
+@using CloneHabr.BlazorUI.Pages.Cabinet.ApproveComponents
 @using CloneHabr.BlazorUI.Pages.Cabinet.UsersManagement
 @inject UserInfo userInfo
 @inject IJSRuntime JsRuntime
@@ -14,16 +15,21 @@
     <div class="my-3" style="@(!userInfo.IsBanned ? "display:block" : "display:none")">
         Ваш статус: активен
         <div class="my-3">
-            <AddNewArticle></AddNewArticle>
+            <AddNewArticle />
         </div>
 
         <div class="my-3">
-            <EditAccountComponent></EditAccountComponent>
+            <EditAccountComponent />
         </div>
 
         <div class="my-3" style="@((userInfo.Role == Dto.@enum.Roles.Moderator || userInfo.Role == Dto.@enum.Roles.Administrator) ? "display:block" : "display:none")">
-            <UsersContainer></UsersContainer>
-
+            <div class="my-3">
+                <UsersContainer />
+            </div>
+            
+            <div class="my-3">
+                <ApproveArticlesContainer />
+            </div>
         </div>
 
     </div>
