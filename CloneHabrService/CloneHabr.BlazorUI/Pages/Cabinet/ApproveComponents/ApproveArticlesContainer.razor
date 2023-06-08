@@ -1,0 +1,63 @@
+﻿@using CloneHabr.Dto.Requests;
+@using CloneHabr.Dto.Status;
+@inject HttpClient httpClient
+
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="/cabinet" @onclick="OnClickShowHideThisComponent">
+        <span class="oi oi-book me-2"></span>Статьи на модерации
+    </NavLink>
+</div>
+
+<div style="@(ShowThisComponent ? "display:block" : "display:none")">
+
+    @if (articlesDto.Count > 0)
+    {
+        <h3>Статей для одобрения: @articlesDto.Count</h3>
+        foreach (var item in articlesDto)
+        {
+            <div class="card mt-3 mb-3 p-3 ">
+                <ApproveContainer articleDto="item" />
+                <ApproveComponent articleId="item.Id" OnArticleApproved="@ArticleApproved" />
+            </div>
+        }
+    }
+    else
+    {
+        <h6>Загрузка...</h6>
+    }
+
+</div>
+
+
+@code {
+    bool ShowThisComponent = false;
+    List<ArticleDto> articlesDto = new();
+
+
+    private void OnClickShowHideThisComponent()
+    {
+        ShowThisComponent = !ShowThisComponent;
+        if (ShowThisComponent)
+        {
+            GetArticles();
+        }
+    }
+
+    private void ArticleApproved(int articleId)
+    {
+        articlesDto.RemoveAll(article => article.Id == articleId);
+    }
+
+    private async void GetArticles()
+    {
+        string uri = $"api/Article/GetArticlesByStatus?articleStatus={ArticleStatus.Moderation}";
+        var response = await httpClient.GetFromJsonAsync<ArticlesLidResponse>(uri);
+
+        if (response is not null && response.Status == ArtclesLidStatus.Success)
+        {
+            articlesDto = response.Articles;
+            StateHasChanged();
+        }
+    }
+
+}

@@ -41,6 +41,7 @@ public class UserInfo
         Token = response.Session.SessionToken;
         Role = response.Session.User.Role;
         IsLoggedIn = true;
+        IsBanned = false;
     }
 
     public void LogIn(AuthenticationResponse response)
@@ -48,6 +49,10 @@ public class UserInfo
         if (response.Session.User.EndDateLocked >= DateTime.Now)
         {
             IsBanned = true;
+        }
+        else
+        {
+            IsBanned = false;
         }
 
         UserId = response.Session.User.UserId;
@@ -65,8 +70,7 @@ public class UserInfo
         Token = string.Empty;
         Role = Roles.UnregistredUser;
         IsLoggedIn = false;
+        IsBanned = false;
     }
-
-
 
 }
